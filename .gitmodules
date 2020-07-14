@@ -1,0 +1,3 @@
+[submodule "pogo-protos"]
+	path = pogo-protos
+	url = https://github.com/versx/pogo-protos
