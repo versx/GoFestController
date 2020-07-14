@@ -1,6 +1,5 @@
 'use strict';
 
-// TODO: Only grab accounts that have has_ticket column flag
 // TODO: Do something with parsed incoming raw data (wild/nearby/encounters, db/webhook)
 // TODO: Pokemon model class
 // TODO: Redis caching for task list/webhooks

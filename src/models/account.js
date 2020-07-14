@@ -15,7 +15,7 @@ class Account {
     lastEncounterLat;
     lastEncounterLon;
     lastEncounterTime;
-    //hasTicket;
+    hasTicket;
 
     /**
      * Initalize new Account object.
@@ -31,7 +31,7 @@ class Account {
      * @param hasTicket
      */
     constructor(username, password, firstWarningTimestamp, failedTimestamp, failed,
-        level, lastEncounterLat, lastEncounterLon, lastEncounterTime/*, hasTicket*/) {
+        level, lastEncounterLat, lastEncounterLon, lastEncounterTime, hasTicket) {
         this.username = username;
         this.password = password;
         if (firstWarningTimestamp > 0) {
@@ -47,7 +47,7 @@ class Account {
         if (lastEncounterTime > 0) {
             this.lastEncounterTime = lastEncounterTime;
         }
-        //this.hasTicket = hasTicket;
+        this.hasTicket = hasTicket;
     }
     
     /**
@@ -55,7 +55,7 @@ class Account {
      */
     static async getAll() {
         let sql = `
-        SELECT username, password, first_warning_timestamp, failed_timestamp, failed, level, last_encounter_lat, last_encounter_lon, last_encounter_time
+        SELECT username, password, first_warning_timestamp, failed_timestamp, failed, level, last_encounter_lat, last_encounter_lon, last_encounter_time, has_ticket
         FROM account
         `;
         let results = await query(sql)
@@ -78,7 +78,7 @@ class Account {
                     row.last_encounter_lat,
                     row.last_encounter_lon,
                     row.last_encounter_time,
-                    //row.has_ticket
+                    row.has_ticket
                 ));
             }
         }
@@ -90,16 +90,16 @@ class Account {
      * @param minLevel 
      * @param maxLevel 
      */
-    static async getNewAccount(minLevel, maxLevel) {
+    static async getNewAccount(minLevel, maxLevel, hasTicket) {
         let sql = `
-        SELECT username, password, level, first_warning_timestamp, failed_timestamp, failed, last_encounter_lat, last_encounter_lon, last_encounter_time
+        SELECT username, password, level, first_warning_timestamp, failed_timestamp, failed, last_encounter_lat, last_encounter_lon, last_encounter_time, has_ticket
         FROM account
         LEFT JOIN device ON username = account_username
-        WHERE first_warning_timestamp is NULL AND failed_timestamp is NULL and device.uuid IS NULL AND level >= ? AND level <= ? AND failed IS NULL AND (last_encounter_time IS NULL OR UNIX_TIMESTAMP() - CAST(last_encounter_time AS SIGNED INTEGER) >= 7200 AND spins < 400)
+        WHERE first_warning_timestamp is NULL AND failed_timestamp is NULL and device.uuid IS NULL AND level >= ? AND level <= ? AND failed IS NULL AND (last_encounter_time IS NULL OR UNIX_TIMESTAMP() - CAST(last_encounter_time AS SIGNED INTEGER) >= 7200 AND spins < 400) AND has_ticket = ?
         ORDER BY level DESC, RAND()
         LIMIT 1
         `;
-        let result = await query(sql, [minLevel, maxLevel])
+        let result = await query(sql, [minLevel, maxLevel, hasTicket])
             .then(x => x)
             .catch(err => { 
                 console.error('[Account] Failed to get new Account', err);
@@ -118,7 +118,8 @@ class Account {
                     key.level,
                     key.last_encounter_lat,
                     key.last_encounter_lon,
-                    key.last_encounter_time
+                    key.last_encounter_time,
+                    key.has_ticket
                 );
             });
         }
@@ -129,14 +130,14 @@ class Account {
      * Get account with username.
      * @param username 
      */
-    static async getWithUsername(username) {
+    static async getWithUsername(username, hasTicket) {
         let sql = `
-        SELECT username, password, first_warning_timestamp, failed_timestamp, failed, level, last_encounter_lat, last_encounter_lon, last_encounter_time
+        SELECT username, password, first_warning_timestamp, failed_timestamp, failed, level, last_encounter_lat, last_encounter_lon, last_encounter_time, hasTicket
         FROM account
-        WHERE username = ?
+        WHERE username = ? AND has_ticket = ?
         LIMIT 1
         `;
-        let args = [username];
+        let args = [username, hasTicket];
         let result = await query(sql, args)
             .then(x => x)
             .catch(err => { 
@@ -155,7 +156,8 @@ class Account {
                 key.level,
                 key.last_encounter_lat,
                 key.last_encounter_lon,
-                key.last_encounter_time
+                key.last_encounter_time,
+                key.has_ticket
             );
         })
         return account;
@@ -163,7 +165,7 @@ class Account {
 
     static async getNewAccountNoToken(minLevel, maxLevel) {
         let sql = `
-        SELECT username, password, first_warning_timestamp, failed_timestamp, failed, level, last_encounter_lat, last_encounter_lon, last_encounter_time
+        SELECT username, password, first_warning_timestamp, failed_timestamp, failed, level, last_encounter_lat, last_encounter_lon, last_encounter_time, has_ticket
         FROM account
         LEFT JOIN device ON username = account_username
         WHERE first_warning_timestamp is NULL AND failed_timestamp is NULL and device.uuid IS NULL AND level >= ? AND level <= ? AND failed IS NULL AND (last_encounter_time IS NULL OR UNIX_TIMESTAMP() -  CAST(last_encounter_time AS SIGNED INTEGER) >= 7200 AND spins < 400) AND ptcToken IS NULL
@@ -189,7 +191,8 @@ class Account {
                 key.level,
                 key.last_encounter_lat,
                 key.last_encounter_lon,
-                key.last_encounter_time
+                key.last_encounter_time,
+                key.has_ticket
             );
         })
         return account;
@@ -239,22 +242,6 @@ class Account {
         //console.log('[Account] SetLevel:', result);
     }
 
-    static async setCooldown(username, lastLat, lastLon) {
-        let sql = `
-        UPDATE account
-        SET last_encounter_lat = ?, last_encounter_lon = ?, last_encounter_time = UNIX_TIMESTAMP()
-        WHERE username = ?
-        `;
-        let args = [lastLat, lastLon, username];
-        let result = await query(sql, args)
-            .then(x => x)
-            .catch(err => { 
-                console.error('[Account] Failed to set cooldown on Account with username', username, 'Error:', err);
-                return null;
-            });
-        console.log('[Account] SetCooldown:', result);
-    }
-
     static async setInstanceUuid(uuid, area, username) {
         let sql = `
         UPDATE account
@@ -283,16 +270,16 @@ class Account {
         if (update) {
             sql = `
             UPDATE account
-            SET password = ?, level = ?, first_warning_timestamp = ?, failed_timestamp = ?, failed = ?, last_encounter_lat = ?, last_encounter_lon = ?, last_encounter_time = ?
+            SET password = ?, level = ?, first_warning_timestamp = ?, failed_timestamp = ?, failed = ?, last_encounter_lat = ?, last_encounter_lon = ?, last_encounter_time = ?, has_ticket = ?
             WHERE username = ?
             `;
-            args = [this.password, this.level, this.firstWarningTimestamp, this.failedTimestamp, this.failed, this.lastEncounterLat, this.lastEncounterLon, this.lastEncounterTime, this.username];
+            args = [this.password, this.level, this.firstWarningTimestamp, this.failedTimestamp, this.failed, this.lastEncounterLat, this.lastEncounterLon, this.lastEncounterTime, this.hasTicket, this.username];
         } else {
             sql = `
-            INSERT INTO account (username, password, level, first_warning_timestamp, failed_timestamp, failed, last_encounter_lat, last_encounter_lon, last_encounter_time)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO account (username, password, level, first_warning_timestamp, failed_timestamp, failed, last_encounter_lat, last_encounter_lon, last_encounter_time, has_ticket)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
-            args = [this.username, this.password, this.level, this.firstWarningTimestamp, this.failedTimestamp, this.failed, this.lastEncounterLat, this.lastEncounterLon, this.lastEncounterTime];
+            args = [this.username, this.password, this.level, this.firstWarningTimestamp, this.failedTimestamp, this.failed, this.lastEncounterLat, this.lastEncounterLon, this.lastEncounterTime, this.hasTicket];
         }
         let result = await query(sql, args)
             .then(x => x)

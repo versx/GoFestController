@@ -91,15 +91,15 @@ const handleControllerData = async (req, res) => {
             }
             break;
         case "get_account":
-            let account = await Account.getNewAccount(minLevel, maxLevel);
+            let account = await Account.getNewAccount(minLevel, maxLevel, true);
             console.log("[Controller] GetAccount:", account);
             if (device === undefined || device === null || 
                 account === undefined || account === null) {
-                console.error("[Controller] Failed to get account, device or account is null.");
+                console.error("[Controller] Failed to get event account, device or account is null.");
                 return res.sendStatus(400);
             }
             if (device.accountUsername) {
-                let oldAccount = await Account.getWithUsername(device.accountUsername);
+                let oldAccount = await Account.getWithUsername(device.accountUsername, true);
                 if (oldAccount instanceof Account && 
                     oldAccount.level >= minLevel &&
                     oldAccount.level <= maxLevel &&
@@ -185,11 +185,7 @@ const handleControllerData = async (req, res) => {
                     if (device.accountUsername === null) {
                         return res.sendStatus(404);
                     }
-                    let failed = await Account.checkFail(device.accountUsername);
-                    if (!failed) {
-                        await Account.setInstanceUuid(device.uuid, device.instanceName, device.accountUsername);
-                    }
-                    await Account.setCooldown(device.accountUsername, device.lastLat, device.lastLon);
+                    await Account.setInstanceUuid(device.uuid, device.instanceName, device.accountUsername);
                     device.accountUsername = null;
                     await device.save(device.uuid);
                     sendResponse(res, 'ok', null);
@@ -380,7 +376,6 @@ const handleWebhookData = async (req, res) => {
             x.type === 'pokemon' &&
             matchesIVFilter(x.message.individual_attack, x.message.individual_defense, x.message.individual_stamina)
         );
-        //console.log("[Webhook] Hundreds Received:", hundreds.length);
         if (filtered.length > 0) {
             console.log("[Webhook] Filtered Pokemon Received:", filtered.length);
             for (let i = 0; i < filtered.length; i++) {
@@ -388,7 +383,6 @@ const handleWebhookData = async (req, res) => {
             }
         }
     }
-    //console.log("[Webhook] Task list count:", hundredIVCache.length);
     res.send('OK');
 };
 
