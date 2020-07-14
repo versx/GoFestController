@@ -8,6 +8,7 @@ const POGOProtos = require('pogo-protos');
 const config = require('./config.json');
 const Account = require('./models/account.js');
 const Device = require('./models/device.js');
+const Pokemon = require('./models/pokemon.js');
 const TaskFactory = require('./services/task-factory.js');
 const { getCurrentTimestamp, base64_decode, sendResponse } = require('./utilities/utils.js');
 
@@ -84,7 +85,7 @@ const handleControllerData = async (req, res) => {
             console.log("[Controller] Get job for uuid", uuid);
             let task = taskFactory.getTask();
             if (task) {
-                console.log("[Controller] Sending job to check 100% IV at", task.lat, task.lon, "for uuid", uuid);
+                console.log("[Controller] Sending job to check filtered IV at", task.lat, task.lon, "for uuid", uuid);
                 sendResponse(res, 'ok', task);
             } else {
                 console.warn("[Controller] No tasks available yet for uuid", uuid);
@@ -314,14 +315,17 @@ const handleRawData = async (req, res) => {
                                 wildPokemon.push({
                                     cell: mapCell.s2_cell_id,
                                     data: wild,
-                                    timestampMs: timestampMs
+                                    timestampMs: timestampMs,
+                                    username: username
                                 });
                             });
                             let nearbyNew = mapCell.nearby_pokemons;
+                            //console.log("NearbyNew:", wildNew);
                             nearbyNew.forEach((nearby) => {
                                 nearbyPokemon.push({
                                     cell: mapCell.s2_cell_id,
-                                    data: nearby
+                                    data: nearby,
+                                    username: username
                                 });
                             });
                         });
@@ -342,21 +346,26 @@ const handleRawData = async (req, res) => {
         console.log("[Raw] Found:", wildPokemon.length, "wild and", nearbyPokemon.length, "nearby Pokemon and", encounters.length, "encounters at", latTarget, lonTarget);
     }
 
+    // TODO: Handle in different thread
     if (wildPokemon.length > 0) {
         for (let i = 0; i < wildPokemon.length; i++) {
             const wild = wildPokemon[i];
-            //console.log("Wild Pokemon Found", wild.data.pokemon_data.pokemon_id);
-            //console.log("Wild data:", wild.data.pokemon_data);
+            const pkmn = new Pokemon({ wild: wild });
+            //console.log("Wild:", pkmn);
+            //pkmn.save(false);
         }
     }
     if (nearbyPokemon.length > 0) {
         for (let i = 0; i < nearbyPokemon.length; i++) {
             const nearby = nearbyPokemon[i];
-            //console.log("Nearby Pokemon Found", nearby.data.pokemon_id);
+            const pkmn = new Pokemon({ nearby: nearby });
+            //console.log("Nearby:", pkmn);
+            //pkmn.save(false);
         }
     }
     if (encounters.length > 0) {
         console.log("[Raw] Encounters:", encounters);
+        // TODO: Check for existing, update data, s2cell stuff
     }
 
     // TODO: Do something with relevant spawns

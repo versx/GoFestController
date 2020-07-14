@@ -132,7 +132,7 @@ class Account {
      */
     static async getWithUsername(username, hasTicket) {
         let sql = `
-        SELECT username, password, first_warning_timestamp, failed_timestamp, failed, level, last_encounter_lat, last_encounter_lon, last_encounter_time, hasTicket
+        SELECT username, password, first_warning_timestamp, failed_timestamp, failed, level, last_encounter_lat, last_encounter_lon, last_encounter_time, has_ticket
         FROM account
         WHERE username = ? AND has_ticket = ?
         LIMIT 1
