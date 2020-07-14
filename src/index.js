@@ -1,11 +1,9 @@
 'use strict';
 
-// TODO: Parse encounters
-// TODO: Allow specific list of IV filters
 // TODO: Only grab accounts that have has_ticket column flag
-// TODO: Do something with parsed incoming raw data (db/webhook)
+// TODO: Do something with parsed incoming raw data (wild/nearby/encounters, db/webhook)
 // TODO: Pokemon model class
-// TODO: Redis caching for 100s
+// TODO: Redis caching for task list/webhooks
 
 const express = require('express');
 const app = express();

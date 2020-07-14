@@ -8,15 +8,22 @@ const MAX_LEVEL = 35;
  * 
  */
 class TaskFactory {
-    static hundredIVCache;
+    ivCache;
 
     /**
      * Instantiate a new TaskFactory object
      */
     constructor() {
-        if (TaskFactory.hundredIVCache === undefined || TaskFactory.hundredIVCache === null) {
-            TaskFactory.hundredIVCache = [];
+        if (this.ivCache === undefined || this.ivCache === null) {
+            this.ivCache = [];
         }
+    }
+
+    /**
+     * Get the length of the IV cache queue
+     */
+    length() {
+        return this.ivCache.length;
     }
 
     /**
@@ -24,31 +31,25 @@ class TaskFactory {
      * @param {*} payload 
      */
     enqueue(payload) {
-        TaskFactory.hundredIVCache.push(payload.message);
+        this.ivCache.push(payload.message);
     }
 
     /**
      * Remove an element from the beginning of the queue
      */
     dequeue() {
-        return TaskFactory.hundredIVCache.shift();
+        return this.ivCache.shift();
+    }
+
+    getAll() {
+        return this.ivCache;
     }
 
     getTask() {
-        console.log("[TaskFactory] Task list:", TaskFactory.hundredIVCache.length);
+        console.log("[TaskFactory] Task list:", this.ivCache.length);
         let pokemon = this.dequeue();
         if (pokemon === undefined || pokemon === null) {
-            //return null;
-            return {
-                "area": "GoFest-Test",
-                "action": "scan_iv",
-                "lat": 0,
-                "lon": 0,
-                "id": 0,
-                "is_spawnpoint": false,
-                "min_level": MIN_LEVEL,
-                "max_level": MAX_LEVEL
-            };
+            return null;
         }
         console.log("[TaskFactory] Grabbed task for", pokemon.encounter_id, "at", pokemon.latitude, pokemon.longitude);
         return {

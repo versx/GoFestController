@@ -5,6 +5,7 @@ const router = express.Router();
 const POGOProtos = require('pogo-protos');
 //const POGOProtos = require('../POGOProtos.Rpc_pb.js');
 
+const config = require('./config.json');
 const Account = require('./models/account.js');
 const Device = require('./models/device.js');
 const TaskFactory = require('./services/task-factory.js');
@@ -14,6 +15,11 @@ const taskFactory = new TaskFactory();
 const levelCache = {};
 
 
+/**
+ * Handle incoming device /controler data
+ * @param {*} req 
+ * @param {*} res 
+ */
 const handleControllerData = async (req, res) => {
     console.log("[Controller] Request payload:", req.body);
     let payload = req.body;
@@ -69,7 +75,7 @@ const handleControllerData = async (req, res) => {
                 : "?";
             try {
                 await Device.touch(uuid, host, false);
-                res.send('OK');
+                sendResponse(res, 'ok', null);
             } catch (err) {
                 res.send(err);
             }
@@ -128,7 +134,7 @@ const handleControllerData = async (req, res) => {
                         banAccount.failedTimestamp = getCurrentTimestamp();
                         banAccount.failed = "banned";
                         await banAccount.save(true);
-                        sendResponse(res, 'ok', {});
+                        sendResponse(res, 'ok', null);
                 }
             } else {
                 if (device === undefined || device === null ||
@@ -144,7 +150,7 @@ const handleControllerData = async (req, res) => {
                 if (warnAccount.firstWarningTimestamp === undefined || warnAccount.firstWarningTimestamp === null) {
                     warnAccount.firstWarningTimestamp = getCurrentTimestamp();
                     await warnAccount.save(true);
-                    sendResponse(res, 'ok', {});
+                    sendResponse(res, 'ok', null);
                 }
             } else {
                 if (device === undefined || device === null ||
@@ -162,7 +168,7 @@ const handleControllerData = async (req, res) => {
                         invalidAccount.failedTimestamp = getCurrentTimestamp();
                         invalidAccount.failed = "invalid_credentials";
                         await invalidAccount.save(true);
-                        sendResponse(res, 'ok', {});
+                        sendResponse(res, 'ok', null);
                 }
             } else {
                 if (device === undefined || device === null ||
@@ -186,7 +192,7 @@ const handleControllerData = async (req, res) => {
                     await Account.setCooldown(device.accountUsername, device.lastLat, device.lastLon);
                     device.accountUsername = null;
                     await device.save(device.uuid);
-                    sendResponse(res, 'ok', {});
+                    sendResponse(res, 'ok', null);
                 } else {
                     return res.sendStatus(404);
                 }
@@ -195,7 +201,7 @@ const handleControllerData = async (req, res) => {
             }
             break;
         case "job_failed":
-            sendResponse(res, 'ok', {});
+            sendResponse(res, 'ok', null);
             break;
         default:
             console.error("[Controller] Unhandled Request:", type);
@@ -204,6 +210,11 @@ const handleControllerData = async (req, res) => {
 };
 
 
+/**
+ * Handle incoming /raw data
+ * @param {*} req 
+ * @param {*} res 
+ */
 const handleRawData = async (req, res) => {
     let json = req.body;
     if (json === undefined || json === null) {
@@ -220,7 +231,7 @@ const handleRawData = async (req, res) => {
         let oldLevel = levelCache[username];
         if (oldLevel !== trainerLevel) {
             await Account.setLevel(username, trainerLevel);
-            levelCache[username] = trainerLevel
+            levelCache[username] = trainerLevel;
         }
     }
     let contents = json["contents"] || json["protos"] || json["gmo"];
@@ -331,7 +342,9 @@ const handleRawData = async (req, res) => {
         }
     }
 
-    console.log("[Raw] Found:", wildPokemon.length, "wild and", nearbyPokemon.length, "nearby Pokemon and", encounters.length, "encounters at", latTarget, lonTarget);
+    if (wildPokemon.length > 0 || nearbyPokemon.length > 0 || encounters.length > 0) {
+        console.log("[Raw] Found:", wildPokemon.length, "wild and", nearbyPokemon.length, "nearby Pokemon and", encounters.length, "encounters at", latTarget, lonTarget);
+    }
 
     if (wildPokemon.length > 0) {
         for (let i = 0; i < wildPokemon.length; i++) {
@@ -349,37 +362,59 @@ const handleRawData = async (req, res) => {
     if (encounters.length > 0) {
         console.log("[Raw] Encounters:", encounters);
     }
+
+    // TODO: Do something with relevant spawns
+    sendResponse(res, 'ok', null);
 };
 
 
+/**
+ * Handle incoming webhook data
+ * @param {*} req 
+ * @param {*} res 
+ */
 const handleWebhookData = async (req, res) => {
-    //console.log("Webhook:", req.body);
-    // TODO: Add custom IV filter list
     let payload = req.body;
     if (payload.length > 0) {
-        let hundreds = payload.filter(x =>
+        let filtered = payload.filter(x =>
             x.type === 'pokemon' &&
-            x.message.individual_attack === 15 &&
-            x.message.individual_defense === 15 &&
-            x.message.individual_stamina === 15
+            matchesIVFilter(x.message.individual_attack, x.message.individual_defense, x.message.individual_stamina)
         );
         //console.log("[Webhook] Hundreds Received:", hundreds.length);
-        if (hundreds.length > 0) {
-            //console.log("[Webhook] Hundreds:", hundreds);
-            console.log("[Webhook] Hundreds Received:", hundreds.length);
-            for (let i = 0; i < hundreds.length; i++) {
-                taskFactory.enqueue(hundreds[i]);
+        if (filtered.length > 0) {
+            console.log("[Webhook] Filtered Pokemon Received:", filtered.length);
+            for (let i = 0; i < filtered.length; i++) {
+                taskFactory.enqueue(filtered[i]);
             }
         }
     }
-    console.log("[Webhook] Task list count:", TaskFactory.hundredIVCache.length);
+    //console.log("[Webhook] Task list count:", hundredIVCache.length);
     res.send('OK');
 };
 
 
+/**
+ * Handle tasks/jobs data
+ * @param {*} req 
+ * @param {*} res 
+ */
 const handleTasksData = async (req, res) => {
-    res.json({ tasks: TaskFactory.hundredIVCache });
+    res.json({ tasks: taskFactory.getAll() });
 };
+
+
+const matchesIVFilter = (atk, def, sta) => {
+    let filters = config.filters;
+    let result = false;
+    for (let i = 0; i < filters.length; i++) {
+        let filter = filters[i];
+        if (filter.atk === atk && filter.def === def && filter.sta === sta) {
+            result = true;
+            break;
+        }
+    }
+    return result;
+}
 
 
 router.get(['/controler', '/controller'], handleControllerData);
