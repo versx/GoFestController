@@ -1,8 +1,9 @@
 'use strict';
 
 // TODO: Do something with parsed incoming raw data (wild/nearby/encounters, db/webhook)
-// TODO: Pokemon model class
+// TODO: Pokemon, Pokestop, Spawnpoint model classes
 // TODO: Redis caching for task list/webhooks
+// TODO: Priority per IV
 
 const express = require('express');
 const app = express();
