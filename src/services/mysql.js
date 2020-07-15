@@ -10,7 +10,8 @@ const getConnection = () => {
         user: config.db.username,
         password: config.db.password,
         database: config.db.database,
-        charset: config.db.charset
+        charset: config.db.charset,
+        supportBigNumbers: true
     });
     
     conn.connect((err) => {

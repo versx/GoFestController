@@ -4,7 +4,7 @@
 // TODO: Redis caching for task list/webhooks
 // TODO: Priority per IV
 // TODO: Pokemon PvP stats and capture rates in webhook events
-// TODO: Fix foreign key constraint error with Pokemon and S2 cell >.> (prevent js from rounding big numbers)
+// TODO: Ensure account is logged into event account
 
 const express = require('express');
 const app = express();

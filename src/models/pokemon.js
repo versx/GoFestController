@@ -56,7 +56,7 @@ class Pokemon {
         } else if (data.nearby) {
             this.initNearby(data);
         } else {
-            this.id = String(data.id);
+            this.id = BigInt(data.id).toString();
             this.lat = data.lat;
             this.lon = data.lon;
             this.pokemonId = data.pokemon_id;
@@ -66,7 +66,7 @@ class Pokemon {
             this.weather = data.weather;
             this.gender = data.gender;
             this.spawnId = data.spawn_id;
-            this.cellId = String(data.cell_id);
+            this.cellId = BigInt(data.cell_id).toString();
             this.firstSeenTimestamp = data.first_seen_timestamp;
             this.expireTimestamp = data.expire_timestamp;
             this.expireTimestampVerified = data.expire_timestamp_verified;
@@ -127,7 +127,7 @@ class Pokemon {
             }
         }
         this.spawnId = spawnId;
-        this.cellId = String(data.wild.cell);
+        this.cellId = BigInt(data.wild.cell).toString();
     }
 
     async initNearby(data) {
@@ -153,7 +153,7 @@ class Pokemon {
             this.lat = pokestop.lat;
             this.lon = pokestop.lon;
         }
-        this.cellId = String(data.nearby.cell);
+        this.cellId = BigInt(data.nearby.cell).toString();
         this.expireTimestampVerified = false;
     }
 
@@ -209,7 +209,7 @@ class Pokemon {
                 updated: key.updated,
                 changed: key.changed,
                 display_pokemon_id: key.display_pokemon_id,
-                cell_id: key.cell_id
+                cell_id: BigInt(key.cell_id).toString()
             });
         })
         return pokemon;
@@ -542,7 +542,6 @@ class Pokemon {
             }
         }
 
-        // TODO: Error: ER_NO_REFERENCED_ROW_2: Cannot add or update a child row: a foreign key constraint fails (`rdmdb`.`pokemon`, CONSTRAINT `fk_pokemon_cell_id` FOREIGN KEY (`cell_id`) REFERENCES `s2cell` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)
         await query(sql, args)
             .then(x => x)
             .catch(err => {
