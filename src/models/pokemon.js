@@ -2,6 +2,7 @@
 
 const moment = require('moment');
 
+const Pokestop = require('./pokestop.js');
 const Spawnpoint = require('./spawnpoint.js');
 const query = require('../services/mysql.js');
 const { getCurrentTimestamp } = require('../utilities/utils.js');
@@ -124,7 +125,7 @@ class Pokemon {
             }
         }
         this.spawnId = spawnId;
-        this.cellId = String(data.cell);
+        this.cellId = String(data.wild.cell);
     }
 
     async initNearby(data) {
@@ -139,23 +140,18 @@ class Pokemon {
         }
         this.username = data.nearby.username;
         let pokestop;
-        // TODO: Pokestops
-        /*
         try {
-            // TODO: Pokestops
             pokestop = await Pokestop.getById(data.nearby.data.fort_id);
         } catch (err) {
             pokestop = null;
-            // TODO: Fix error
             console.error("[Pokemon] InitNearby Error: " + err);
         }
-        */
         if (pokestop) {
             this.pokestopId = pokestop.id;
             this.lat = pokestop.lat;
             this.lon = pokestop.lon;
         }
-        this.cellId = String(data.cell);
+        this.cellId = String(data.nearby.cell);
         this.expireTimestampVerified = false;
     }
 
