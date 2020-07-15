@@ -1,5 +1,8 @@
 'use strict';
 
+const moment = require('moment');
+
+const Spawnpoint = require('./spawnpoint.js');
 const query = require('../services/mysql.js');
 const { getCurrentTimestamp } = require('../utilities/utils.js');
 
@@ -107,16 +110,13 @@ class Pokemon {
         if (!this.expireTimestampVerified && spawnId) {
             // Spawnpoint not verified, check if we have the tth.
             let spawnpoint = {};
-            // TODO: Spawnpoints
-            /*
             try {
                 spawnpoint = await Spawnpoint.getById(spawnId);
             } catch (err) {
                 spawnpoint = null;
             }
-            */
             if (spawnpoint instanceof Spawnpoint) {
-                let expireTimestamp = this.getDespawnTimer(spawnpoint, data.timestampMs);
+                let expireTimestamp = this.getDespawnTimer(spawnpoint, data.wild.timestampMs);
                 if (expireTimestamp > 0) {
                     this.expireTimestamp = expireTimestamp;
                     this.expireTimestampVerified = true;
@@ -157,64 +157,6 @@ class Pokemon {
         }
         this.cellId = String(data.cell);
         this.expireTimestampVerified = false;
-    }
-
-    /**
-     * Load all Pokemon.
-     */
-    static async getAll() {
-        let sql = `
-            SELECT id, pokemon_id, lat, lon, spawn_id, expire_timestamp, atk_iv, def_iv, sta_iv,
-            move_1, move_2, gender, form, cp, level, weather, costume, weight, size, display_pokemon_id,
-            pokestop_id, updated, first_seen_timestamp, changed, cell_id, expire_timestamp_verified,
-            shiny, username
-            FROM pokemon
-            WHERE expire_timestamp >= UNIX_TIMESTAMP()
-        `;
-        let results = await query(sql)
-            .then(x => x)
-            .catch(err => {
-                console.error("[Pokemon] Error: " + err);
-                return null;
-            });
-        let keys = Object.values(results);
-        if (keys.length === 0) {
-            return null;
-        }
-        let pokemon = [];
-        keys.forEach(key => {
-            pokemon.push(new Pokemon({
-                id: key.id,
-                lat: key.lat,
-                lon: key.lon,
-                pokemon_id: key.pokemon_id,
-                form: key.form,
-                gender: key.gender,
-                costume: key.costume,
-                shiny: key.shiny,
-                weather: key.weather,
-                level: key.level,
-                cp: key.cp,
-                move1: key.move_1,
-                move2: key.move_2,
-                size: key.size,
-                weight: key.weight,
-                spawn_id: key.spawn_id,
-                expire_timestamp: key.expire_timestamp,
-                expire_timestamp_verified: key.expire_timestamp_verified,
-                first_seen_timestamp: key.first_seen_timestamp,
-                pokestop_id: key.pokestop_id,
-                atk_iv: key.atk_iv,
-                def_iv: key.def_iv,
-                sta_iv: key.sta_iv,
-                username: key.username,
-                updated: key.updated,
-                changed: key.changed,
-                display_pokemon_id: key.display_pokemon_id,
-                cell_id: key.cell_id
-            }));
-        });
-        return pokemon;
     }
 
     /**
@@ -322,14 +264,11 @@ class Pokemon {
 
             if (this.expireTimestampVerified === false && this.spawnId !== undefined) {
                 let spawnpoint;
-                // TODO: Spawnpoints
-                /*
                 try {
                     spawnpoint = await Spawnpoint.getById(this.spawnId);
                 } catch (err) {
                     spawnpoint = null;
                 }
-                */
                 if (spawnpoint instanceof Spawnpoint) {
                     let expireTimestamp = this.getDespawnTimer(spawnpoint, getCurrentTimestamp() * 1000);
                     if (expireTimestamp > 0) {
@@ -650,6 +589,43 @@ class Pokemon {
             }
             let despawn = parseInt(dateUnix) + despawnOffset;
             return despawn;
+        }
+    }
+
+    /**
+     * Get Pokemon as JSON message for webhook payload
+     */
+    toJson() {
+        return {
+            type: "pokemon",
+            message: {
+                spawnpoint_id: this.spawnId /* TODO: toHexString()*/ || "None",
+                pokestop_id: this.pokestopId || "None",
+                encounter_id: this.id,
+                pokemon_id: this.pokemonId,
+                latitude: this.lat,
+                longitude: this.lon,
+                disappear_time: this.expireTimestamp || 0,
+                disappear_time_verified: this.expireTimestampVerified,
+                first_seen: this.firstSeenTimestamp || 1,
+                last_modified_time: this.updated || 1,
+                gender: this.gender,
+                cp: this.cp,
+                form: this.form,
+                costume: this.costume,
+                individual_attack: this.atkIv,
+                individual_defense: this.defIv,
+                individual_stamina: this.staIv,
+                pokemon_level: this.level,
+                move_1: this.move1,
+                move_2: this.move2,
+                weight: this.weight,
+                height: this.size,
+                weather: this.weather,
+                shiny: this.shiny,
+                username: this.username,
+                display_pokemon_id: this.displayPokemonId
+            }
         }
     }
 }

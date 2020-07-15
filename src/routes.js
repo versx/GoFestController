@@ -365,6 +365,14 @@ const handleRawData = async (req, res) => {
     }
     if (encounters.length > 0) {
         console.log("[Raw] Encounters:", encounters);
+        for (let i = 0; i < encounters.length; i++) {
+            const encounter = encounters[i];
+            const pkmn = await Pokemon.getById(encounter.encounter_id);
+            if (pkmn instanceof Pokemon) {
+                pkmn.addEncounter(encounter, username);
+                await pkmn.save(true);
+            }
+        }
         // TODO: Check for existing, update data, s2cell stuff
     }
 
