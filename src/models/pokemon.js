@@ -4,6 +4,7 @@ const moment = require('moment');
 
 const Pokestop = require('./pokestop.js');
 const Spawnpoint = require('./spawnpoint.js');
+const WebhookController = require('../services/webhook-controller.js');
 const query = require('../services/mysql.js');
 const { getCurrentTimestamp } = require('../utilities/utils.js');
 
@@ -13,6 +14,7 @@ class Pokemon {
     static WeatherBoostMinIvStat = 4;
     static PokemonTimeUnseen = 1200;
     static PokemonTimeReseen = 600;
+    static DittoDisguises = [46,163,165,167,187,223,293,316,322,399,590];
 
     id;
     lat;
@@ -302,7 +304,7 @@ class Pokemon {
      * @param pokemon 
      */
     static isDittoDisguisedFromPokemon(pokemon) {
-        let isDisguised = (pokemon.pokemonId == Pokemon.DittoPokemonId) || (DbController.DittoDisguises.includes(pokemon.pokemonId) || false);
+        let isDisguised = (pokemon.pokemonId == Pokemon.DittoPokemonId) || (Pokemon.DittoDisguises.includes(pokemon.pokemonId) || false);
         let isUnderLevelBoosted = pokemon.level > 0 && pokemon.level < Pokemon.WeatherBoostMinLevel;
         let isUnderIvStatBoosted = pokemon.level > 0 && (pokemon.atkIv < Pokemon.WeatherBoostMinIvStat || pokemon.defIv < Pokemon.WeatherBoostMinIvStat || pokemon.staIv < Pokemon.WeatherBoostMinIvStat);
         let isWeatherBoosted = pokemon.weather > 0;
@@ -319,7 +321,7 @@ class Pokemon {
      * @param staIv 
      */
     static isDittoDisguised(pokemonId, level, weather, atkIv, defIv, staIv) {
-        let isDisguised = (pokemonId == Pokemon.DittoPokemonId) || (DbController.DittoDisguises.includes(pokemonId) || false);
+        let isDisguised = (pokemonId == Pokemon.DittoPokemonId) || (Pokemon.DittoDisguises.includes(pokemonId) || false);
         let isUnderLevelBoosted = level > 0 && level < Pokemon.WeatherBoostMinLevel;
         let isUnderIvStatBoosted = level > 0 && (atkIv < Pokemon.WeatherBoostMinIvStat || defIv < Pokemon.WeatherBoostMinIvStat || staIv < Pokemon.WeatherBoostMinIvStat);
         let isWeatherBoosted = weather > 0;
@@ -393,7 +395,7 @@ class Pokemon {
             let changedSQL
             if (updateIV && (oldPokemon.atkIv === undefined || oldPokemon.atkIv === null) && this.atkIv) {
                 WebhookController.instance.addPokemonEvent(this);
-                InstanceController.instance.gotIV(this);
+                //InstanceController.instance.gotIV(this);
                 bindChangedTimestamp = false;
                 changedSQL = "UNIX_TIMESTAMP()";
             } else {
@@ -425,10 +427,11 @@ class Pokemon {
                 }
             }
 
-            let shouldWrite = Pokemon.shouldUpdate(oldPokemon, this);
-            if (!shouldWrite) {
-                return;
-            }
+            // TODO: Impl `shouldWrite` Pokemon method
+            //let shouldWrite = Pokemon.shouldUpdate(oldPokemon, this);
+            //if (!shouldWrite) {
+            //    return;
+            //}
 
             let ivSQL
             if (updateIV) {
@@ -490,21 +493,21 @@ class Pokemon {
                 let minute = parseInt(split[0]);
                 let second = parseInt(split[1]);
                 let secondOfHour = second + minute * 60;
-                spawnpoint = new Spawnpoint({
-                    id: this.spawnId,
-                    lat: this.lat,
-                    lon: this.lon,
-                    updated: this.updated,
-                    despawn_sec: secondOfHour
-                });
+                spawnpoint = new Spawnpoint(
+                    this.spawnId,
+                    this.lat,
+                    this.lon,
+                    secondOfHour,
+                    this.updated
+                );
             } else {
-                spawnpoint = new Spawnpoint({
-                    id: this.spawnId,
-                    lat: this.lat,
-                    lon: this.lon,
-                    updated: this.updated,
-                    despawn_sec: null
-                });
+                spawnpoint = new Spawnpoint(
+                    this.spawnId,
+                    this.lat,
+                    this.lon,
+                    null,
+                    this.updated
+                );
             }
             try {
                 await spawnpoint.save(true);
@@ -549,15 +552,13 @@ class Pokemon {
                 return null;
             });
 
-        /*
         if (oldPokemon === undefined || oldPokemon === null) {
             WebhookController.instance.addPokemonEvent(this);
-            InstanceController.instance.gotPokemon(this);
-            if (this.atkIv) {
-                InstanceController.instance.gotIV(this);
-            }
+            //InstanceController.instance.gotPokemon(this);
+            //if (this.atkIv) {
+            //    InstanceController.instance.gotIV(this);
+            //}
         }
-        */
     }
 
     /**

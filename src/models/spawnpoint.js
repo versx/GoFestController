@@ -1,6 +1,7 @@
 'use strict';
 
 const query = require('../services/mysql.js');
+const { getCurrentTimestamp } = require('../utilities/utils.js');
 
 /**
  * Spawnpoint model class.

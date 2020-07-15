@@ -10,6 +10,7 @@ const Account = require('./models/account.js');
 const Device = require('./models/device.js');
 const Pokemon = require('./models/pokemon.js');
 const TaskFactory = require('./services/task-factory.js');
+const WebhookController = require('./services/webhook-controller.js');
 const { getCurrentTimestamp, base64_decode, sendResponse } = require('./utilities/utils.js');
 
 const taskFactory = new TaskFactory();
@@ -248,9 +249,6 @@ const handleRawData = async (req, res) => {
         }
     }
 
-    //let pokemonEncounterId = json["pokemon_encounter_id"];
-    //let pokemonEncounterIdForEncounter = json["pokemon_encounter_id_for_encounter"];
-
     let wildPokemon = [];
     let nearbyPokemon = [];
     let encounters = [];
@@ -353,6 +351,7 @@ const handleRawData = async (req, res) => {
             const pkmn = new Pokemon({ wild: wild });
             //console.log("Wild:", pkmn);
             //pkmn.save(false);
+            WebhookController.instance.addPokemonEvent(pkmn); // TODO: Remove maybe
         }
     }
     if (nearbyPokemon.length > 0) {
@@ -361,13 +360,15 @@ const handleRawData = async (req, res) => {
             const pkmn = new Pokemon({ nearby: nearby });
             //console.log("Nearby:", pkmn);
             //pkmn.save(false);
+            WebhookController.instance.addPokemonEvent(pkmn); // TODO: Remove maybe
         }
     }
     if (encounters.length > 0) {
         console.log("[Raw] Encounters:", encounters);
+        // TODO: We only care about encounters
         for (let i = 0; i < encounters.length; i++) {
             const encounter = encounters[i];
-            const pkmn = await Pokemon.getById(encounter.encounter_id);
+            const pkmn = await Pokemon.getById(encounter.wild_pokemon.encounter_id);
             if (pkmn instanceof Pokemon) {
                 pkmn.addEncounter(encounter, username);
                 await pkmn.save(true);
