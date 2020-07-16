@@ -10,6 +10,7 @@ Backend to facilitate re-checking a Pokemon spawn with an event ticket account.
 ALTER TABLE `account`
 ADD COLUMN `has_ticket` tinyint(1) unsigned NOT NULL DEFAULT 0;
 ```
+- Add your event accounts to the database and change `has_ticket` to `1`  
 
 
 ## Installation  
@@ -17,7 +18,7 @@ ADD COLUMN `has_ticket` tinyint(1) unsigned NOT NULL DEFAULT 0;
 2.) Change directory to cloned folder: `cd GoFestController`  
 3.) Install dependencies: `npm install`  
 4.) Create config from example: `cp src/config.example.json src/config.json`  
-5.) Edit/fill out config: `vi src/config.json`
+5.) Edit/fill out config: `vi src/config.json`  
 6.) Start `npm run start`  
 
 
