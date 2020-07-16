@@ -48,6 +48,8 @@ class Pokemon {
     capture1;
     capture2;
     capture3;
+    pvpRankingsGreatLeague;
+    pvpRankingsUltraLeague;
 
     /**
      * Initialize new Pokemon object.
@@ -90,6 +92,8 @@ class Pokemon {
             this.capture1 = data.capture_1;
             this.capture2 = data.capture_2;
             this.capture3 = data.capture_3;
+            this.pvpRankingsGreatLeague = data.pvp_rankings_great_league;
+            this.pvpRankingsUltraLeague = data.pvp_rankings_ultra_league;
         }
     }
 
@@ -111,7 +115,7 @@ class Pokemon {
         }
         this.username = data.wild.username;
         if (data.wild.data.time_till_hidden_ms > 0 && data.wild.data.time_till_hidden_ms <= 90000) {
-            this.expireTimestamp = Math.round(data.wild.timestampMs / 1000 + data.wild.data.time_till_hidden_ms);
+            this.expireTimestamp = Math.round(data.wild.timestamp_ms / 1000 + data.wild.data.time_till_hidden_ms);
             this.expireTimestampVerified = true;
         } else {
             this.expireTimestampVerified = false;
@@ -125,7 +129,7 @@ class Pokemon {
                 spawnpoint = null;
             }
             if (spawnpoint instanceof Spawnpoint) {
-                let expireTimestamp = this.getDespawnTimer(spawnpoint, data.wild.timestampMs);
+                let expireTimestamp = this.getDespawnTimer(spawnpoint, data.wild.timestamp_ms);
                 if (expireTimestamp > 0) {
                     this.expireTimestamp = expireTimestamp;
                     this.expireTimestampVerified = true;
@@ -169,7 +173,12 @@ class Pokemon {
      */
     static async getById(encounterId) {
         let sql = `
-            SELECT id, pokemon_id, lat, lon, spawn_id, expire_timestamp, atk_iv, def_iv, sta_iv, move_1, move_2, gender, form, cp, level, weather, costume, weight, size, display_pokemon_id, pokestop_id, updated, first_seen_timestamp, changed, cell_id, expire_timestamp_verified, shiny, username, capture_1, capture_2, capture_3
+            SELECT
+                id, pokemon_id, lat, lon, spawn_id, expire_timestamp, atk_iv, def_iv, sta_iv,
+                move_1, move_2, gender, form, cp, level, weather, costume, weight, size,
+                display_pokemon_id, pokestop_id, updated, first_seen_timestamp, changed, cell_id,
+                expire_timestamp_verified, shiny, username, capture_1, capture_2, capture_3,
+                pvp_rankings_great_league, pvp_rankings_ultra_league
             FROM pokemon
             WHERE id = ?
             LIMIT 1
@@ -218,7 +227,9 @@ class Pokemon {
                 cell_id: BigInt(key.cell_id).toString(),
                 capture1: key.capture_1,
                 capture2: key.capture_2,
-                capture3: key.capture_3
+                capture3: key.capture_3,
+                pvpRankingsGreatLeague: key.pvp_rankings_great_league,
+                pvpRankingsUltraLeague: key.pvp_rankings_ultra_league,
             });
         })
         return pokemon;
@@ -367,8 +378,8 @@ class Pokemon {
             }
             this.firstSeenTimestamp = this.updated;
             sql = `
-                INSERT INTO pokemon (id, pokemon_id, lat, lon, spawn_id, expire_timestamp, atk_iv, def_iv, sta_iv, move_1, move_2, cp, level, weight, size, display_pokemon_id, shiny, username, gender, form, weather, costume, pokestop_id, updated, first_seen_timestamp, changed, cell_id, expire_timestamp_verified, capture_1, capture_2, capture_3)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), ?, ?, ?, ?, ?)
+                INSERT INTO pokemon (id, pokemon_id, lat, lon, spawn_id, expire_timestamp, atk_iv, def_iv, sta_iv, move_1, move_2, cp, level, weight, size, display_pokemon_id, shiny, username, gender, form, weather, costume, pokestop_id, updated, first_seen_timestamp, changed, cell_id, expire_timestamp_verified, capture_1, capture_2, capture_3, pvp_rankings_great_league, pvp_rankings_ultra_league)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), ?, ?, ?, ?, ?, ?, ?)
             `;
             args.push(this.id.toString());
         } else {
@@ -499,6 +510,8 @@ class Pokemon {
         args.push(this.capture1);
         args.push(this.capture2);
         args.push(this.capture3);
+        args.push(this.pvpRankingsGreatLeague);
+        args.push(this.pvpRankingsUltraLeague);
         if (oldPokemon) {
             args.push(this.id);
         }
@@ -641,7 +654,9 @@ class Pokemon {
                 display_pokemon_id: this.displayPokemonId,
                 capture_1: this.capture1,
                 capture_2: this.capture2,
-                capture_3: this.capture3
+                capture_3: this.capture3,
+                pvp_rankings_great_league: this.pvpRankingsGreatLeague,
+                pvp_rankings_ultra_league: this.pvpRankingsUltraLeague
             }
         }
     }

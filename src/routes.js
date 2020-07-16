@@ -23,7 +23,7 @@ const levelCache = {};
  * @param {*} res 
  */
 const handleControllerData = async (req, res) => {
-    console.log('[Controller] Request payload:', req.body);
+    //console.log('[Controller] Request payload:', req.body);
     let payload = req.body;
     let type = payload['type'];
     let uuid = payload['uuid'];
@@ -83,7 +83,7 @@ const handleControllerData = async (req, res) => {
             }
             break;
         case 'get_job':
-            console.log('[Controller] Get job for uuid', uuid);
+            //console.log('[Controller] Get job for uuid', uuid);
             let task = taskFactory.getTask();
             if (task) {
                 console.log('[Controller] Sending job to check filtered IV at', task.lat, task.lon, 'for uuid', uuid);
@@ -242,7 +242,6 @@ const handleRawData = async (req, res) => {
     let lonTarget = json['lon_target'];
     if (uuid && latTarget && lonTarget) {
         try {
-            //console.log('[Raw] Setting', uuid, 'last device location to', latTarget, lonTarget);
             await Device.setLastLocation(uuid, latTarget, lonTarget);
         } catch (err) {
             console.error('[Raw] Error:', err);
@@ -307,18 +306,17 @@ const handleRawData = async (req, res) => {
                             return res.sendStatus(400);
                         }
                         gmo.map_cells.forEach((mapCell) => {
-                            let timestampMs = mapCell.current_timestamp_ms;
+                            let timestamp = mapCell.current_timestamp_ms;
                             let wildNew = mapCell.wild_pokemons;
                             wildNew.forEach((wild) => {
                                 wildPokemon.push({
                                     cell: mapCell.s2_cell_id,
                                     data: wild,
-                                    timestampMs: timestampMs,
+                                    timestamp_ms: timestamp,
                                     username: username
                                 });
                             });
                             let nearbyNew = mapCell.nearby_pokemons;
-                            //console.log('NearbyNew:', wildNew);
                             nearbyNew.forEach((nearby) => {
                                 nearbyPokemon.push({
                                     cell: mapCell.s2_cell_id,
@@ -341,13 +339,13 @@ const handleRawData = async (req, res) => {
     }
 
     if (wildPokemon.length > 0 || nearbyPokemon.length > 0 || encounters.length > 0) {
-        console.log('[Raw] Found:', wildPokemon.length, 'wild and', nearbyPokemon.length, 'nearby Pokemon and', encounters.length, 'encounters at', latTarget, lonTarget);
+        console.log('[Raw] Found:', wildPokemon.length, 'wild Pokemon,', nearbyPokemon.length, 'nearby Pokemon, and', encounters.length, 'encounters at', latTarget, lonTarget);
     }
 
     setImmediate(async () => await handleConsumables(wildPokemon, nearbyPokemon, encounters, username));
-
     sendResponse(res, 'ok', null);
 };
+
 
 const handleConsumables = async (wildPokemon, nearbyPokemon, encounters, username) => {
     if (wildPokemon.length > 0) {
@@ -355,7 +353,7 @@ const handleConsumables = async (wildPokemon, nearbyPokemon, encounters, usernam
             const wild = wildPokemon[i];
             const pkmn = new Pokemon({ wild: wild });
             //await pkmn.save(false);
-            WebhookController.instance.addPokemonEvent(pkmn); // TODO: Remove maybe
+            //WebhookController.instance.addPokemonEvent(pkmn);
         }
     }
     if (nearbyPokemon.length > 0) {
@@ -363,11 +361,11 @@ const handleConsumables = async (wildPokemon, nearbyPokemon, encounters, usernam
             const nearby = nearbyPokemon[i];
             const pkmn = new Pokemon({ nearby: nearby });
             //await pkmn.save(false);
-            WebhookController.instance.addPokemonEvent(pkmn); // TODO: Remove maybe
+            //WebhookController.instance.addPokemonEvent(pkmn);
         }
     }
     if (encounters.length > 0) {
-        console.log('[Raw] Encounters:', encounters);
+        //console.log('[Raw] Encounters:', encounters);
         // We only really care about encounters
         for (let i = 0; i < encounters.length; i++) {
             const encounter = encounters[i];
