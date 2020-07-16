@@ -10,6 +10,7 @@ Backend to facilitate re-checking a Pokemon spawn with an event ticket account.
 ALTER TABLE `account`
 ADD COLUMN `has_ticket` tinyint(1) unsigned NOT NULL DEFAULT 0;
 ```
+- Add your event accounts to the database and change `has_ticket` to `1`  
 
 
 ## Installation  
