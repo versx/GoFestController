@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/versx/GoFestController#readme",
   "dependencies": {
+    "eslint": "^7.4.0",
     "express": "^4.17.1",
     "google-protobuf": "^3.12.2",
     "helmet": "^3.23.3",
@@ -27,5 +28,8 @@
     "pogo-protos": "file:pogo-protos",
     "request": "^2.88.2",
     "require-all": "^3.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0"
   }
 }
