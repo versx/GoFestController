@@ -8,7 +8,7 @@ const Spawnpoint = require('./spawnpoint.js');
 const TaskFactory = require('../services/task-factory.js');
 const WebhookController = require('../services/webhook-controller.js');
 const query = require('../services/mysql.js');
-const { getCurrentTimestamp } = require('../utilities/utils.js');
+const { getCurrentTimestamp, generateEncounterId } = require('../utilities/utils.js');
 
 class Pokemon {
     static DittoPokemonId = 132;
@@ -635,7 +635,7 @@ class Pokemon {
             message: {
                 spawnpoint_id: this.spawnId /* TODO: toHexString()*/ || 'None',
                 pokestop_id: this.pokestopId || 'None',
-                encounter_id: config.randomizeEncounter ? "" : this.id,
+                encounter_id: config.randomizeEncounter ? generateEncounterId() : this.id,
                 pokemon_id: this.pokemonId,
                 latitude: this.lat,
                 longitude: this.lon,

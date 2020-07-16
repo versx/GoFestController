@@ -20,8 +20,14 @@ const sendResponse = (res, status, data) => {
     });
 };
 
+const generateEncounterId = () => {
+    const id = Math.floor(10000000000000000000 + Math.random() * 90000000000000000000);
+    return id;
+};
+
 module.exports = {
     getCurrentTimestamp,
     base64_decode,
-    sendResponse
+    sendResponse,
+    generateEncounterId
 };
