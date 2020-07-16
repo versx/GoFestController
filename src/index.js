@@ -1,6 +1,6 @@
 'use strict';
 
-// TODO: Redis caching for task list/webhooks
+// TODO: Redis caching for incoming webhooks for pvp data if needed?
 // TODO: Priority per IV
 // TODO: Config option to randomize encounter_id after recheck
 
@@ -39,7 +39,7 @@ app.post('/', router.handleWebhookData);
 app.get('/tasks', router.handleTasksData);
 
 /*
-router.post('/test', (req, res) => {
+app.post('/test', (req, res) => {
     console.log('Received', req.body.length, 'webhooks from GoFestController');
     console.log('Payload:', req.body);
     res.send('OK');

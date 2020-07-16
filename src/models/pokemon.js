@@ -663,7 +663,8 @@ class Pokemon {
                 capture_2: this.capture2,
                 capture_3: this.capture3,
                 pvp_rankings_great_league: this.pvpRankingsGreatLeague,
-                pvp_rankings_ultra_league: this.pvpRankingsUltraLeague
+                pvp_rankings_ultra_league: this.pvpRankingsUltraLeague,
+                is_event: true
             }
         }
     }
