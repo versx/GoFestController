@@ -1,9 +1,7 @@
 'use strict';
 
-// TODO: Cache incoming Pokemon webhooks in order to reference PVP stats when checked or maybe we can grab them from database instead
 // TODO: Redis caching for task list/webhooks
 // TODO: Priority per IV
-// TODO: Ensure account is logged into event account
 
 const express = require('express');
 const app = express();

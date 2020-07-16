@@ -45,7 +45,7 @@ const handleControllerData = async (req, res) => {
             if (device === undefined || device.accountUsername === undefined) {
                 firstWarningTimestamp = null;
             } else {
-                let account = await Account.getWithUsername(device.accountUsername);
+                let account = await Account.getWithUsername(device.accountUsername, true);
                 if (account instanceof Account) {
                     firstWarningTimestamp = account.firstWarningTimestamp;
                 } else {
@@ -83,7 +83,6 @@ const handleControllerData = async (req, res) => {
             }
             break;
         case 'get_job':
-            //console.log('[Controller] Get job for uuid', uuid);
             let task = taskFactory.getTask();
             if (task) {
                 console.log('[Controller] Sending job to check filtered IV at', task.lat, task.lon, 'for uuid', uuid);
@@ -103,6 +102,7 @@ const handleControllerData = async (req, res) => {
             if (device.accountUsername) {
                 let oldAccount = await Account.getWithUsername(device.accountUsername, true);
                 if (oldAccount instanceof Account && 
+                    oldAccount.hasTicket &&
                     oldAccount.level >= minLevel &&
                     oldAccount.level <= maxLevel &&
                     oldAccount.firstWarningTimestamp === undefined && 
@@ -118,6 +118,10 @@ const handleControllerData = async (req, res) => {
                 }
             }
 
+            if (!account.hasTicket) {
+                console.error('[Controller] Failed to get event account, make sure you have enough!');
+                return res.sendStatus(404);
+            }
             device.accountUsername = account.username;
             device.deviceLevel = account.level;
             await device.save(device.uuid);
@@ -129,7 +133,7 @@ const handleControllerData = async (req, res) => {
             });
             break;
         case 'account_banned':
-            let banAccount = await Account.getWithUsername(device.accountUsername);
+            let banAccount = await Account.getWithUsername(device.accountUsername, true);
             if (banAccount instanceof Account) {
                 if (banAccount.failedTimestamp === undefined || banAccount.failedTimestamp === null || 
                     banAccount.failed === undefined || banAccount.failed === null) {
@@ -147,7 +151,7 @@ const handleControllerData = async (req, res) => {
             }
             break;
         case 'account_warning':
-            let warnAccount = await Account.getWithUsername(device.accountUsername);
+            let warnAccount = await Account.getWithUsername(device.accountUsername, true);
             if (warnAccount instanceof Account) {
                 if (warnAccount.firstWarningTimestamp === undefined || warnAccount.firstWarningTimestamp === null) {
                     warnAccount.firstWarningTimestamp = getCurrentTimestamp();
@@ -163,7 +167,7 @@ const handleControllerData = async (req, res) => {
             }
             break;
         case 'account_invalid_credentials':
-            let invalidAccount = await Account.getWithUsername(device.accountUsername);
+            let invalidAccount = await Account.getWithUsername(device.accountUsername, true);
             if (invalidAccount instanceof Account) {
                 if (invalidAccount.failedTimestamp === undefined || invalidAccount.failedTimestamp === null || 
                     invalidAccount.failed === undefined || invalidAccount.failed === null) {

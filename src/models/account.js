@@ -49,41 +49,6 @@ class Account {
         }
         this.hasTicket = hasTicket;
     }
-    
-    /**
-     * Get all accounts.
-     */
-    static async getAll() {
-        let sql = `
-        SELECT username, password, first_warning_timestamp, failed_timestamp, failed, level, last_encounter_lat, last_encounter_lon, last_encounter_time, has_ticket
-        FROM account
-        `;
-        let results = await query(sql)
-            .then(x => x)
-            .catch(err => {
-                console.error('[Account] Error:', err);
-                return null;
-            });
-        let accounts = [];
-        if (results && results.length > 0) {
-            for (let i = 0; i < results.length; i++) {
-                let row = results[i];
-                accounts.push(new Account(
-                    row.username,
-                    row.password,
-                    row.first_warning_timestamp,
-                    row.failed_timestamp,
-                    row.failed,
-                    row.level,
-                    row.last_encounter_lat,
-                    row.last_encounter_lon,
-                    row.last_encounter_time,
-                    row.has_ticket
-                ));
-            }
-        }
-        return accounts;
-    }
 
     /**
      * Get new account between minimum and maximum level.
@@ -142,41 +107,6 @@ class Account {
             .then(x => x)
             .catch(err => { 
                 console.error('[Account] Failed to get Account with username', username, 'Error:', err);
-                return null;
-            });
-        let account;
-        let keys = Object.values(result);
-        keys.forEach(key => {
-            account = new Account(
-                key.username,
-                key.password,
-                key.first_warning_timestamp,
-                key.failed_timestamp,
-                key.failed,
-                key.level,
-                key.last_encounter_lat,
-                key.last_encounter_lon,
-                key.last_encounter_time,
-                key.has_ticket
-            );
-        })
-        return account;
-    }
-
-    static async getNewAccountNoToken(minLevel, maxLevel) {
-        let sql = `
-        SELECT username, password, first_warning_timestamp, failed_timestamp, failed, level, last_encounter_lat, last_encounter_lon, last_encounter_time, has_ticket
-        FROM account
-        LEFT JOIN device ON username = account_username
-        WHERE first_warning_timestamp is NULL AND failed_timestamp is NULL and device.uuid IS NULL AND level >= ? AND level <= ? AND failed IS NULL AND (last_encounter_time IS NULL OR UNIX_TIMESTAMP() -  CAST(last_encounter_time AS SIGNED INTEGER) >= 7200 AND spins < 400) AND ptcToken IS NULL
-        ORDER BY level DESC, RAND()
-        LIMIT 1
-        `;
-        let args = [minLevel, maxLevel];
-        let result = await query(sql, args)
-            .then(x => x)
-            .catch(err => { 
-                console.error('[Account] Failed to get Account between level', minLevel + '-' + maxLevel, 'Error:', err);
                 return null;
             });
         let account;
