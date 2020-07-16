@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const query = require('../services/mysql.js');
 
@@ -48,7 +48,7 @@ class Device {
         let results = await query(sql)
             .then(x => x)
             .catch(err => {
-                console.error("[Device] Error: " + err);
+                console.error('[Device] Error:', err);
                 return null;
             });
         let devices = [];
@@ -86,7 +86,7 @@ class Device {
         let result = await query(sql, args)
             .then(x => x)
             .catch(err => { 
-                console.error("[Device] Failed to get Device with uuid", uuid, "Error:", err);
+                console.error('[Device] Failed to get Device with uuid', uuid, 'Error:', err);
             });
         let device;
         if (result) {
@@ -97,7 +97,7 @@ class Device {
                     key.instance_name,
                     key.account_username,
                     key.device_level || 0,
-                    key.last_host || "",
+                    key.last_host || '',
                     key.last_seen || 0,
                     key.last_lat || 0.0,
                     key.last_lon || 0.0
@@ -123,9 +123,9 @@ class Device {
         let results = await query(sql, args)
             .then(x => x)
             .catch(err => {
-                console.error("[Device] Error:", err);
+                console.error('[Device] Error:', err);
             });
-        //console.log("[Device] SetLastLocation:", results);
+        //console.log('[Device] SetLastLocation:', results);
     }
 
     /**
@@ -152,9 +152,9 @@ class Device {
         let results = await query(sql, args)
             .then(x => x)
             .catch(err => {
-                console.error("[Device] Error:", err);
+                console.error('[Device] Error:', err);
             });
-        //console.log("[Device] Touch:", results);
+        //console.log('[Device] Touch:', results);
     }
 
     /**
@@ -169,9 +169,9 @@ class Device {
         let results = await query(sql, args)
             .then(x => x)
             .catch(err => {
-                console.error("[Device] Error:", err);
+                console.error('[Device] Error:', err);
             });
-        console.log("[Device] Insert:", results);
+        console.log('[Device] Insert:', results);
     }
 
     /**
@@ -188,9 +188,9 @@ class Device {
        let results = await query(sql, args)
            .then(x => x)
            .catch(err => {
-               console.error("[Device] Error:", err);
+               console.error('[Device] Error:', err);
            });
-        //console.log("[Device] Save:", results);
+        //console.log('[Device] Save:', results);
     }
 }
 

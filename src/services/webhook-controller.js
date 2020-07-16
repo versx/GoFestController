@@ -12,14 +12,14 @@ class WebhookController {
 
     urls;
     delay;
-    events;
+    pokemonEvents;
     timer;
 
     constructor(urls, delay = 5) {
-        console.info("[WebhookController] Starting up...");
+        console.info('[WebhookController] Starting up...');
         this.urls = urls;
         this.delay = delay;
-        this.events = [];
+        this.pokemonEvents = [];
     }
 
     start() {
@@ -45,9 +45,7 @@ class WebhookController {
                 events.push(pokemonEvent.toJson());
             }
             if (events && events.length > 0) {
-                DbController.WebhookUrls.forEach(url => {
-                    this.sendEvents(events, url);
-                });
+                this.urls.forEach(url => this.sendEvents(events, url));
             }
         }
     }
@@ -65,16 +63,16 @@ class WebhookController {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'Cache-Control': 'no-cache',
-                'User-Agent': 'Nodedradamus'
+                'User-Agent': 'GoFestController'
             }
         };
         // TODO: Use axios instead
         request(options, (err, res, body) => {
             if (err) { //throw err;
-                console.error("[WebhookController] Error:", err);
+                console.error('[WebhookController] Error:', err);
                 return;
             }
-            console.debug("[WebhookController] Response:", body);
+            //console.debug('[WebhookController] Response:', body);
         });
     }
 }

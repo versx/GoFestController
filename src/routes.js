@@ -23,24 +23,24 @@ const levelCache = {};
  * @param {*} res 
  */
 const handleControllerData = async (req, res) => {
-    console.log("[Controller] Request payload:", req.body);
+    console.log('[Controller] Request payload:', req.body);
     let payload = req.body;
-    let type = payload["type"];
-    let uuid = payload["uuid"];
+    let type = payload['type'];
+    let uuid = payload['uuid'];
     if (type === undefined || type === null ||
         uuid === undefined || uuid === null) {
-        console.error("[Controller] Failed to parse controller data");
+        console.error('[Controller] Failed to parse controller data');
         return res.sendStatus(400);
     }
-    //let username = payload["username"];
-    let minLevel = parseInt(payload["min_level"] || 0);
-    let maxLevel = parseInt(payload["max_level"] || 29);
+    //let username = payload['username'];
+    let minLevel = parseInt(payload['min_level'] || 0);
+    let maxLevel = parseInt(payload['max_level'] || 29);
     let device = await Device.getById(uuid);
 
-    console.log("[Controller]", uuid, "received control request:", type);
+    console.log('[Controller]', uuid, 'received control request:', type);
 
     switch (type) {
-        case "init":
+        case 'init':
             let firstWarningTimestamp;
             if (device === undefined || device.accountUsername === undefined) {
                 firstWarningTimestamp = null;
@@ -54,14 +54,14 @@ const handleControllerData = async (req, res) => {
             }
             if (device instanceof Device) {
                 // Device is already registered
-                console.log("[Controller] Device already registered");
+                console.log('[Controller] Device already registered');
                 sendResponse(res, 'ok', {
-                    assigned: device.instanceName !== undefined && device.instanceName !== null && device.instanceName !== "",
+                    assigned: device.instanceName !== undefined && device.instanceName !== null && device.instanceName !== '',
                     first_warning_timestamp: firstWarningTimestamp || 0
                 });
             } else {
                 // Register new device
-                console.log("[Controller] Registering device");
+                console.log('[Controller] Registering device');
                 let newDevice = new Device(uuid, null, null, 0, null, 0, 0.0, 0.0, null);
                 await newDevice.create();
                 sendResponse(res, 'ok', {
@@ -70,11 +70,11 @@ const handleControllerData = async (req, res) => {
                 });
             }
             break;
-        case "heartbeat":
+        case 'heartbeat':
             let client = req.socket;
             let host = client 
                 ? `${client.remoteAddress}:${client.remotePort}` 
-                : "?";
+                : '?';
             try {
                 await Device.touch(uuid, host, false);
                 sendResponse(res, 'ok', null);
@@ -82,22 +82,22 @@ const handleControllerData = async (req, res) => {
                 res.send(err);
             }
             break;
-        case "get_job":
-            console.log("[Controller] Get job for uuid", uuid);
+        case 'get_job':
+            console.log('[Controller] Get job for uuid', uuid);
             let task = taskFactory.getTask();
             if (task) {
-                console.log("[Controller] Sending job to check filtered IV at", task.lat, task.lon, "for uuid", uuid);
+                console.log('[Controller] Sending job to check filtered IV at', task.lat, task.lon, 'for uuid', uuid);
                 sendResponse(res, 'ok', task);
             } else {
-                console.warn("[Controller] No tasks available yet for uuid", uuid);
+                console.warn('[Controller] No tasks available yet for uuid', uuid);
             }
             break;
-        case "get_account":
+        case 'get_account':
             let account = await Account.getNewAccount(minLevel, maxLevel, true);
-            console.log("[Controller] GetAccount:", account);
+            console.log('[Controller] GetAccount:', account);
             if (device === undefined || device === null || 
                 account === undefined || account === null) {
-                console.error("[Controller] Failed to get event account, device or account is null.");
+                console.error('[Controller] Failed to get event account, device or account is null.');
                 return res.sendStatus(400);
             }
             if (device.accountUsername) {
@@ -128,25 +128,25 @@ const handleControllerData = async (req, res) => {
                 level: account.level
             });
             break;
-        case "account_banned":
+        case 'account_banned':
             let banAccount = await Account.getWithUsername(device.accountUsername);
             if (banAccount instanceof Account) {
                 if (banAccount.failedTimestamp === undefined || banAccount.failedTimestamp === null || 
                     banAccount.failed === undefined || banAccount.failed === null) {
                         banAccount.failedTimestamp = getCurrentTimestamp();
-                        banAccount.failed = "banned";
+                        banAccount.failed = 'banned';
                         await banAccount.save(true);
                         sendResponse(res, 'ok', null);
                 }
             } else {
                 if (device === undefined || device === null ||
                     banAccount === undefined || banAccount === null) {
-                    console.error("[Controller] Failed to get account, device or account is null.");
+                    console.error('[Controller] Failed to get account, device or account is null.');
                     return res.sendStatus(400);
                 }
             }
             break;
-        case "account_warning":
+        case 'account_warning':
             let warnAccount = await Account.getWithUsername(device.accountUsername);
             if (warnAccount instanceof Account) {
                 if (warnAccount.firstWarningTimestamp === undefined || warnAccount.firstWarningTimestamp === null) {
@@ -157,30 +157,30 @@ const handleControllerData = async (req, res) => {
             } else {
                 if (device === undefined || device === null ||
                     warnAccount === undefined || warnAccount === null) {
-                    console.error("[Controller] Failed to get account, device or account is null.");
+                    console.error('[Controller] Failed to get account, device or account is null.');
                     return res.sendStatus(400);
                 }
             }
             break;
-        case "account_invalid_credentials":
+        case 'account_invalid_credentials':
             let invalidAccount = await Account.getWithUsername(device.accountUsername);
             if (invalidAccount instanceof Account) {
                 if (invalidAccount.failedTimestamp === undefined || invalidAccount.failedTimestamp === null || 
                     invalidAccount.failed === undefined || invalidAccount.failed === null) {
                         invalidAccount.failedTimestamp = getCurrentTimestamp();
-                        invalidAccount.failed = "invalid_credentials";
+                        invalidAccount.failed = 'invalid_credentials';
                         await invalidAccount.save(true);
                         sendResponse(res, 'ok', null);
                 }
             } else {
                 if (device === undefined || device === null ||
                     invalidAccount === undefined || invalidAccount === null) {
-                    console.error("[Controller] Failed to get account, device or account is null.");
+                    console.error('[Controller] Failed to get account, device or account is null.');
                     return res.sendStatus(400);
                 }
             }
             break;
-        case "logged_out":
+        case 'logged_out':
             try {
                 let device = await Device.getById(uuid);
                 if (device instanceof Device) {
@@ -198,11 +198,11 @@ const handleControllerData = async (req, res) => {
                 return res.sendStatus(500);
             }
             break;
-        case "job_failed":
+        case 'job_failed':
             sendResponse(res, 'ok', null);
             break;
         default:
-            console.error("[Controller] Unhandled Request:", type);
+            console.error('[Controller] Unhandled Request:', type);
             return res.sendStatus(404);
     }
 };
@@ -216,15 +216,15 @@ const handleControllerData = async (req, res) => {
 const handleRawData = async (req, res) => {
     let json = req.body;
     if (json === undefined || json === null) {
-        console.error("[Raw] Bad data");
+        console.error('[Raw] Bad data');
         return res.sendStatus(400);
     }
     if (json['payload']) {
         json['contents'] = [json];
     }
 
-    let trainerLevel = parseInt(json["trainerlvl"] || json["trainerLevel"]) || 0;
-    let username = json["username"];
+    let trainerLevel = parseInt(json['trainerlvl'] || json['trainerLevel']) || 0;
+    let username = json['username'];
     if (username && trainerLevel > 0) {
         let oldLevel = levelCache[username];
         if (oldLevel !== trainerLevel) {
@@ -232,20 +232,20 @@ const handleRawData = async (req, res) => {
             levelCache[username] = trainerLevel;
         }
     }
-    let contents = json["contents"] || json["protos"] || json["gmo"];
+    let contents = json['contents'] || json['protos'] || json['gmo'];
     if (contents === undefined || contents === null) {
-        console.error("[Raw] Invalid GMO");
+        console.error('[Raw] Invalid GMO');
         return res.sendStatus(400);
     }
-    let uuid = json["uuid"];
-    let latTarget = json["lat_target"];
-    let lonTarget = json["lon_target"];
+    let uuid = json['uuid'];
+    let latTarget = json['lat_target'];
+    let lonTarget = json['lon_target'];
     if (uuid && latTarget && lonTarget) {
         try {
-            //console.log("[Raw] Setting", uuid, "last device location to", latTarget, lonTarget);
+            //console.log('[Raw] Setting', uuid, 'last device location to', latTarget, lonTarget);
             await Device.setLastLocation(uuid, latTarget, lonTarget);
         } catch (err) {
-            console.error("[Raw] Error:", err);
+            console.error('[Raw] Error:', err);
         }
     }
 
@@ -262,16 +262,16 @@ const handleRawData = async (req, res) => {
         const rawData = contents[i];
         let data = {};
         let method = 0;
-        if (rawData["data"]) {
-            data = rawData["data"];
-            method = parseInt(rawData["method"]) || 106;
-        } else if (rawData["payload"]) {
-            data = rawData["payload"];
-            method = parseInt(rawData["type"]) || 106;
+        if (rawData['data']) {
+            data = rawData['data'];
+            method = parseInt(rawData['method']) || 106;
+        } else if (rawData['payload']) {
+            data = rawData['payload'];
+            method = parseInt(rawData['type']) || 106;
             isMadData = true;
-            username = "PogoDroid";
+            username = 'PogoDroid';
         } else {
-            console.error("[Raw] Unhandled proto:", rawData);
+            console.error('[Raw] Unhandled proto:', rawData);
             return res.sendStatus(400);
         }
 
@@ -289,10 +289,10 @@ const handleRawData = async (req, res) => {
                         if (er) {
                             encounters.push(er);
                         } else {
-                            console.error("[Raw] Malformed EncounterResponse");
+                            console.error('[Raw] Malformed EncounterResponse');
                         }
                     } catch (err) {
-                        console.error("[Raw] Unable to decode EncounterResponse");
+                        console.error('[Raw] Unable to decode EncounterResponse');
                     }
                 }
                 break;
@@ -303,7 +303,7 @@ const handleRawData = async (req, res) => {
                     if (gmo) {
                         isInvalidGMO = false;
                         if (gmo.map_cells.length === 0) {
-                            //console.debug("[Raw] Map cells is empty");
+                            //console.debug('[Raw] Map cells is empty');
                             return res.sendStatus(400);
                         }
                         gmo.map_cells.forEach((mapCell) => {
@@ -318,7 +318,7 @@ const handleRawData = async (req, res) => {
                                 });
                             });
                             let nearbyNew = mapCell.nearby_pokemons;
-                            //console.log("NearbyNew:", wildNew);
+                            //console.log('NearbyNew:', wildNew);
                             nearbyNew.forEach((nearby) => {
                                 nearbyPokemon.push({
                                     cell: mapCell.s2_cell_id,
@@ -328,20 +328,20 @@ const handleRawData = async (req, res) => {
                             });
                         });
                     } else {
-                        console.error("[Raw] Malformed GetMapObjectsResponse");
+                        console.error('[Raw] Malformed GetMapObjectsResponse');
                     }
                 } catch (err) {
-                    console.error("[Raw] Unable to decode GetMapObjectsResponse:", err);
+                    console.error('[Raw] Unable to decode GetMapObjectsResponse:', err);
                 }
                 break;
             default:
-                console.error("[Raw] Invalid method provided:", method);
+                console.error('[Raw] Invalid method provided:', method);
                 return;
         }
     }
 
     if (wildPokemon.length > 0 || nearbyPokemon.length > 0 || encounters.length > 0) {
-        console.log("[Raw] Found:", wildPokemon.length, "wild and", nearbyPokemon.length, "nearby Pokemon and", encounters.length, "encounters at", latTarget, lonTarget);
+        console.log('[Raw] Found:', wildPokemon.length, 'wild and', nearbyPokemon.length, 'nearby Pokemon and', encounters.length, 'encounters at', latTarget, lonTarget);
     }
 
     // TODO: Handle in different thread
@@ -349,7 +349,7 @@ const handleRawData = async (req, res) => {
         for (let i = 0; i < wildPokemon.length; i++) {
             const wild = wildPokemon[i];
             const pkmn = new Pokemon({ wild: wild });
-            //console.log("Wild:", pkmn);
+            //console.log('Wild:', pkmn);
             //pkmn.save(false);
             WebhookController.instance.addPokemonEvent(pkmn); // TODO: Remove maybe
         }
@@ -358,13 +358,13 @@ const handleRawData = async (req, res) => {
         for (let i = 0; i < nearbyPokemon.length; i++) {
             const nearby = nearbyPokemon[i];
             const pkmn = new Pokemon({ nearby: nearby });
-            //console.log("Nearby:", pkmn);
+            //console.log('Nearby:', pkmn);
             //pkmn.save(false);
             WebhookController.instance.addPokemonEvent(pkmn); // TODO: Remove maybe
         }
     }
     if (encounters.length > 0) {
-        console.log("[Raw] Encounters:", encounters);
+        console.log('[Raw] Encounters:', encounters);
         // TODO: We only care about encounters
         for (let i = 0; i < encounters.length; i++) {
             const encounter = encounters[i];
@@ -377,7 +377,6 @@ const handleRawData = async (req, res) => {
         // TODO: Check for existing, update data, s2cell stuff
     }
 
-    // TODO: Do something with relevant spawns
     sendResponse(res, 'ok', null);
 };
 
@@ -395,7 +394,7 @@ const handleWebhookData = async (req, res) => {
             matchesIVFilter(x.message.individual_attack, x.message.individual_defense, x.message.individual_stamina)
         );
         if (filtered.length > 0) {
-            console.log("[Webhook] Filtered Pokemon Received:", filtered.length);
+            console.log('[Webhook] Filtered Pokemon Received:', filtered.length);
             for (let i = 0; i < filtered.length; i++) {
                 taskFactory.enqueue(filtered[i]);
             }
@@ -439,5 +438,13 @@ router.get('/', handleWebhookData);
 router.post('/', handleWebhookData);
 
 router.get('/tasks', handleTasksData);
+
+/*
+router.post('/test', (req, res) => {
+    console.log('Received', req.body.length, 'webhooks from GoFestController');
+    console.log('Payload:', req.body);
+    res.send('OK');
+});
+*/
 
 module.exports = router;

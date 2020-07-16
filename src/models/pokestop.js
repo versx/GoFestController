@@ -36,7 +36,7 @@ class Pokestop {
      * @param withDeleted 
      */
     static async getById(pokestopId, withDeleted = false) {
-        let withDeletedSQL = withDeleted ? "" : "AND deleted = false";
+        let withDeletedSQL = withDeleted ? '' : 'AND deleted = false';
         let sql = `
         SELECT id, lat, lon, name, url, enabled, cell_id
         FROM pokestop
@@ -47,7 +47,7 @@ class Pokestop {
         let results = await query(sql, args)
             .then(x => x)
             .catch(err => {
-                console.error("[Pokestop] Error: " + err);
+                console.error('[Pokestop] Error:', err);
                 return null;
             });
         let keys = Object.values(results);

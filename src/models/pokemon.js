@@ -45,6 +45,9 @@ class Pokemon {
     cellId;
     displayPokemonId;
     isDitto = false;
+    capture1;
+    capture2;
+    capture3;
 
     /**
      * Initialize new Pokemon object.
@@ -65,7 +68,7 @@ class Pokemon {
             this.costume = data.costume;
             this.weather = data.weather;
             this.gender = data.gender;
-            this.spawnId = data.spawn_id;
+            this.spawnId = data.spawn_id ? BigInt(data.spawn_id).toString() : null;
             this.cellId = BigInt(data.cell_id).toString();
             this.firstSeenTimestamp = data.first_seen_timestamp;
             this.expireTimestamp = data.expire_timestamp;
@@ -84,19 +87,22 @@ class Pokemon {
             this.changed = data.changed;
             this.pokestopId = data.pokestop_id;
             this.displayPokemonId = data.display_pokemon_id;
+            this.capture1 = data.capture_1;
+            this.capture2 = data.capture_2;
+            this.capture3 = data.capture_3;
         }
     }
 
     async initWild(data) {
         this.id = data.wild.data.encounter_id.toString();
-        //console.log("Wild Pokemon Data:", data.wild.data.pokemon_data);
+        //console.log('Wild Pokemon Data:', data.wild.data.pokemon_data);
         this.pokemonId = data.wild.data.pokemon_data.pokemon_id;
         if (data.wild.data.latitude === undefined || data.wild.data.latitude === null) {
-            console.debug("[Pokemon] Wild Pokemon null lat/lon!");
+            console.debug('[Pokemon] Wild Pokemon null lat/lon!');
         }
         this.lat = data.wild.data.latitude;
         this.lon = data.wild.data.longitude;
-        let spawnId = parseInt(data.wild.data.spawn_point_id, 16).toString();
+        let spawnId = BigInt(parseInt(data.wild.data.spawn_point_id, 16)).toString();//parseInt(data.wild.data.spawn_point_id, 16).toString();
         this.gender = data.wild.data.pokemon_data.pokemon_display.gender;
         this.form = data.wild.data.pokemon_data.pokemon_display.form;
         if (data.wild.data.pokemon_data.pokemon_display) {
@@ -146,7 +152,7 @@ class Pokemon {
             pokestop = await Pokestop.getById(data.nearby.data.fort_id);
         } catch (err) {
             pokestop = null;
-            console.error("[Pokemon] InitNearby Error: " + err);
+            console.error('[Pokemon] InitNearby Error:', err);
         }
         if (pokestop) {
             this.pokestopId = pokestop.id;
@@ -163,7 +169,7 @@ class Pokemon {
      */
     static async getById(encounterId) {
         let sql = `
-            SELECT id, pokemon_id, lat, lon, spawn_id, expire_timestamp, atk_iv, def_iv, sta_iv, move_1, move_2, gender, form, cp, level, weather, costume, weight, size, display_pokemon_id, pokestop_id, updated, first_seen_timestamp, changed, cell_id, expire_timestamp_verified, shiny, username
+            SELECT id, pokemon_id, lat, lon, spawn_id, expire_timestamp, atk_iv, def_iv, sta_iv, move_1, move_2, gender, form, cp, level, weather, costume, weight, size, display_pokemon_id, pokestop_id, updated, first_seen_timestamp, changed, cell_id, expire_timestamp_verified, shiny, username, capture_1, capture_2, capture_3
             FROM pokemon
             WHERE id = ?
             LIMIT 1
@@ -172,7 +178,7 @@ class Pokemon {
         let results = await query(sql, args)
             .then(x => x)
             .catch(err => {
-                console.error("[Pokemon] Error: " + err);
+                console.error('[Pokemon] Error: ' + err);
                 return null;
             });
         let keys = Object.values(results);
@@ -182,7 +188,7 @@ class Pokemon {
         let pokemon;
         keys.forEach(key => {
             pokemon = new Pokemon({
-                id: key.id,
+                id: BigInt(key.id).toString(),
                 lat: key.lat,
                 lon: key.lon,
                 pokemon_id: key.pokemon_id,
@@ -197,7 +203,7 @@ class Pokemon {
                 move2: key.move_2,
                 size: key.size,
                 weight: key.weight,
-                spawn_id: key.spawn_id,
+                spawn_id: key.spawn_id ? BigInt(key.spawn_id).toString() : null,
                 expire_timestamp: key.expire_timestamp,
                 expire_timestamp_verified: key.expire_timestamp_verified,
                 first_seen_timestamp: key.first_seen_timestamp,
@@ -209,7 +215,10 @@ class Pokemon {
                 updated: key.updated,
                 changed: key.changed,
                 display_pokemon_id: key.display_pokemon_id,
-                cell_id: BigInt(key.cell_id).toString()
+                cell_id: BigInt(key.cell_id).toString(),
+                capture1: key.capture_1,
+                capture2: key.capture_2,
+                capture3: key.capture_3
             });
         })
         return pokemon;
@@ -223,8 +232,8 @@ class Pokemon {
     async addEncounter(encounter, username) {
         this.pokemonId = encounter.wild_pokemon.pokemon_data.pokemon_id;
         this.cp = encounter.wild_pokemon.pokemon_data.cp;
-        this.move1 = encounter.wild_pokemon.pokemon_data.move1;
-        this.move2 = encounter.wild_pokemon.pokemon_data.move2;
+        this.move1 = encounter.wild_pokemon.pokemon_data.move_1;
+        this.move2 = encounter.wild_pokemon.pokemon_data.move_2;
         this.size = encounter.wild_pokemon.pokemon_data.height_m;
         this.weight = encounter.wild_pokemon.pokemon_data.weight_kg;
         this.atkIv = encounter.wild_pokemon.pokemon_data.individual_attack;
@@ -235,6 +244,11 @@ class Pokemon {
         this.username = username;
         this.form = encounter.wild_pokemon.pokemon_data.pokemon_display.form;
         this.gender = encounter.wild_pokemon.pokemon_data.pokemon_display.gender;
+        if (encounter.capture_probability) {
+            this.capture1 = parseFloat(encounter.capture_probability.capture_probability[0])
+            this.capture2 = parseFloat(encounter.capture_probability.capture_probability[1])
+            this.capture3 = parseFloat(encounter.capture_probability.capture_probability[2])
+        }
         let cpMultiplier = encounter.wild_pokemon.pokemon_data.cp_multiplier;
         let level;
         if (cpMultiplier < 0.734) {
@@ -251,12 +265,12 @@ class Pokemon {
                                                 this.staIv || 0
         );
         if (this.isDitto) {
-            console.log("[POKEMON] Pokemon", this.id, "Ditto found, disguised as", this.pokemonId);
+            console.log('[POKEMON] Pokemon', this.id, 'Ditto found, disguised as', this.pokemonId);
             this.setDittoAttributes(this.pokemonId);
         }
 
         if (this.spawnId === undefined) {
-            this.spawnId = parseInt(encounter.wild_pokemon.spawn_point_id, 16).toString();
+            this.spawnId = BigInt(encounter.wild_pokemon.spawn_point_id).toString();//parseInt(encounter.wild_pokemon.spawn_point_id, 16).toString();
             this.lat = encounter.wild_pokemon.latitude;
             this.lon = encounter.wild_pokemon.longitude;
 
@@ -279,6 +293,7 @@ class Pokemon {
 
         this.updated = getCurrentTimestamp();
         this.changed = this.updated;
+        // TODO: Capture rates for new pokes
     }
 
     /**
@@ -343,7 +358,7 @@ class Pokemon {
         } catch (err) {
             oldPokemon = null;
         }
-        let sql = "";
+        let sql = '';
         let args = [];
         if (oldPokemon === null) {
             bindFirstSeen = false;
@@ -353,8 +368,8 @@ class Pokemon {
             }
             this.firstSeenTimestamp = this.updated;
             sql = `
-                INSERT INTO pokemon (id, pokemon_id, lat, lon, spawn_id, expire_timestamp, atk_iv, def_iv, sta_iv, move_1, move_2, cp, level, weight, size, display_pokemon_id, shiny, username, gender, form, weather, costume, pokestop_id, updated, first_seen_timestamp, changed, cell_id, expire_timestamp_verified)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), ?, ?)
+                INSERT INTO pokemon (id, pokemon_id, lat, lon, spawn_id, expire_timestamp, atk_iv, def_iv, sta_iv, move_1, move_2, cp, level, weight, size, display_pokemon_id, shiny, username, gender, form, weather, costume, pokestop_id, updated, first_seen_timestamp, changed, cell_id, expire_timestamp_verified, capture_1, capture_2, capture_3)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), ?, ?, ?, ?, ?)
             `;
             args.push(this.id.toString());
         } else {
@@ -375,9 +390,9 @@ class Pokemon {
             }
             if (oldPokemon.pokemonId !== this.pokemonId) {
                 if (oldPokemon.pokemonId !== Pokemon.DittoPokemonId) {
-                    console.log("[POKEMON] Pokemon", this.id, "changed from", oldPokemon.pokemonId, "to", this.pokemonId);
+                    console.log('[POKEMON] Pokemon', this.id, 'changed from', oldPokemon.pokemonId, 'to', this.pokemonId);
                 } else if (oldPokemon.displayPokemonId || 0 !== this.pokemonId) {
-                    console.log("[POKEMON] Pokemon", this.id, "Ditto diguised as", (oldPokemon.displayPokemonId || 0), "now seen as", this.pokemonId);
+                    console.log('[POKEMON] Pokemon', this.id, 'Ditto diguised as', (oldPokemon.displayPokemonId || 0), 'now seen as', this.pokemonId);
                 }
             }
             if (oldPokemon.cellId && (this.cellId === undefined || this.cellId === null)) {
@@ -397,11 +412,11 @@ class Pokemon {
                 WebhookController.instance.addPokemonEvent(this);
                 //InstanceController.instance.gotIV(this);
                 bindChangedTimestamp = false;
-                changedSQL = "UNIX_TIMESTAMP()";
+                changedSQL = 'UNIX_TIMESTAMP()';
             } else {
                 bindChangedTimestamp = true;
                 this.changed = oldPokemon.changed;
-                changedSQL = "?";
+                changedSQL = '?';
             }
 
             if (updateIV && oldPokemon.atkIv && (this.atkIv === undefined || this.atkIv === null)) {
@@ -421,7 +436,7 @@ class Pokemon {
                     this.shiny = oldPokemon.shiny;
                     this.isDitto = Pokemon.isDittoDisguisedFromPokemon(oldPokemon);
                     if (this.isDitto) {
-                        console.log("[POKEMON] oldPokemon", this.id, "Ditto found, disguised as", this.pokemonId);
+                        console.log('[POKEMON] oldPokemon', this.id, 'Ditto found, disguised as', this.pokemonId);
                         this.setDittoAttributes(this.pokemonId);
                     }
                 }
@@ -435,17 +450,17 @@ class Pokemon {
 
             let ivSQL
             if (updateIV) {
-                ivSQL = "atk_iv = ?, def_iv = ?, sta_iv = ?, move_1 = ?, move_2 = ?, cp = ?, level = ?, weight = ?, size = ?, shiny = ?, display_pokemon_id = ?,";
+                ivSQL = 'atk_iv = ?, def_iv = ?, sta_iv = ?, move_1 = ?, move_2 = ?, cp = ?, level = ?, weight = ?, size = ?, shiny = ?, display_pokemon_id = ?,';
             } else {
-                ivSQL = "";
+                ivSQL = '';
             }
 
             if (oldPokemon.pokemonId === Pokemon.DittoPokemonId && this.pokemonId !== Pokemon.DittoPokemonId) {
-                console.log("[POKEMON] Pokemon", this.id, "Ditto changed from", oldPokemon.pokemonId, "to", this.pokemonId);
+                console.log('[POKEMON] Pokemon', this.id, 'Ditto changed from', oldPokemon.pokemonId, 'to', this.pokemonId);
             }
             sql = `
             UPDATE pokemon
-            SET pokemon_id = ?, lat = ?, lon = ?, spawn_id = ?, expire_timestamp = ?, ${ivSQL} username = ?, gender = ?, form = ?, weather = ?, costume = ?, pokestop_id = ?, updated = UNIX_TIMESTAMP(), first_seen_timestamp = ?, changed = ${changedSQL}, cell_id = ?, expire_timestamp_verified = ?
+            SET pokemon_id = ?, lat = ?, lon = ?, spawn_id = ?, expire_timestamp = ?, ${ivSQL} username = ?, gender = ?, form = ?, weather = ?, costume = ?, pokestop_id = ?, updated = UNIX_TIMESTAMP(), first_seen_timestamp = ?, changed = ${changedSQL}, cell_id = ?, expire_timestamp_verified = ?, capture_1 = ?, capture_2 = ?, capture_3 = ?
             WHERE id = ?
             `;
         }
@@ -482,6 +497,9 @@ class Pokemon {
         }
         args.push(this.cellId || null);
         args.push(this.expireTimestampVerified);
+        args.push(this.capture1);
+        args.push(this.capture2);
+        args.push(this.capture3);
         if (oldPokemon) {
             args.push(this.id);
         }
@@ -512,10 +530,11 @@ class Pokemon {
             try {
                 await spawnpoint.save(true);
             } catch (err) {
-                console.error("[Pokemon] Spawnpoint Error:", err);
+                console.error('[Pokemon] Spawnpoint Error:', err);
             }
         }
 
+        // TODO: Remove VV
         if (this.lat === undefined && this.pokestopId) {
             if (this.pokestopId) {
                 let pokestop;
@@ -545,9 +564,9 @@ class Pokemon {
         await query(sql, args)
             .then(x => x)
             .catch(err => {
-                console.log("[Pokemon] SQL:", sql);
-                console.log("[Pokemon] Arguments:", args);
-                console.error("[Pokemon] Error:", err);
+                console.log('[Pokemon] SQL:', sql);
+                console.log('[Pokemon] Arguments:', args);
+                console.error('[Pokemon] Error:', err);
                 return null;
             });
 
@@ -593,10 +612,10 @@ class Pokemon {
      */
     toJson() {
         return {
-            type: "pokemon",
+            type: 'pokemon',
             message: {
-                spawnpoint_id: this.spawnId /* TODO: toHexString()*/ || "None",
-                pokestop_id: this.pokestopId || "None",
+                spawnpoint_id: this.spawnId /* TODO: toHexString()*/ || 'None',
+                pokestop_id: this.pokestopId || 'None',
                 encounter_id: this.id,
                 pokemon_id: this.pokemonId,
                 latitude: this.lat,
@@ -620,7 +639,10 @@ class Pokemon {
                 weather: this.weather,
                 shiny: this.shiny,
                 username: this.username,
-                display_pokemon_id: this.displayPokemonId
+                display_pokemon_id: this.displayPokemonId,
+                capture_1: this.capture1,
+                capture_2: this.capture2,
+                capture_3: this.capture3
             }
         }
     }

@@ -46,21 +46,21 @@ class TaskFactory {
     }
 
     getTask() {
-        console.log("[TaskFactory] Task list:", this.ivCache.length);
+        console.log('[TaskFactory] Task list:', this.ivCache.length);
         let pokemon = this.dequeue();
         if (pokemon === undefined || pokemon === null) {
             return null;
         }
-        console.log("[TaskFactory] Grabbed task for", pokemon.encounter_id, "at", pokemon.latitude, pokemon.longitude);
+        console.log('[TaskFactory] Grabbed task for', pokemon.encounter_id, 'at', pokemon.latitude, pokemon.longitude);
         return {
-            "area": "GoFest-Test", // TODO: Instance name
-            "action": "scan_iv",
-            "lat": pokemon.latitude,
-            "lon": pokemon.longitude,
-            "id": pokemon.encounter_id,
-            "is_spawnpoint": pokemon.spawnpoint_id !== undefined && pokemon.spawnpoint_id !== null,
-            "min_level": MIN_LEVEL,
-            "max_level": MAX_LEVEL
+            'area': 'GoFest-Test', // TODO: Instance name
+            'action': 'scan_iv',
+            'lat': pokemon.latitude,
+            'lon': pokemon.longitude,
+            'id': pokemon.encounter_id,
+            'is_spawnpoint': pokemon.spawnpoint_id !== undefined && pokemon.spawnpoint_id !== null,
+            'min_level': MIN_LEVEL,
+            'max_level': MAX_LEVEL
         };
     }
 }

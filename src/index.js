@@ -3,8 +3,9 @@
 // TODO: S2Cell model class
 // TODO: Redis caching for task list/webhooks
 // TODO: Priority per IV
-// TODO: Pokemon PvP stats and capture rates in webhook events
+// TODO: Pokemon PvP stats in webhook events
 // TODO: Ensure account is logged into event account
+// TODO: Add min/max level to config
 
 const express = require('express');
 const app = express();

@@ -18,7 +18,7 @@ class Spawnpoint {
      * @param data 
      */
     constructor(id, lat, lon, despawnSecond, updated) {
-        this.id = id.toString();//parseInt(data.id.toString(), 16).toString();
+        this.id = BigInt(id).toString();//parseInt(data.id.toString(), 16).toString();
         this.lat = lat;
         this.lon = lon;
         this.despawnSecond = despawnSecond;
@@ -39,7 +39,7 @@ class Spawnpoint {
         let result = await query(sql, args)
             .then(x => x)
             .catch(err => {
-                console.error("[Spawnpoint] Error: " + err);
+                console.error('[Spawnpoint] Error:', err);
             });
         let spawnpoint;
         if (result) {
@@ -49,7 +49,7 @@ class Spawnpoint {
             }
             keys.forEach(key => {
                 spawnpoint = new Spawnpoint(
-                    key.id,
+                    BigInt(key.id).toString(),
                     key.lat,
                     key.lon,
                     key.despawn_sec,
@@ -104,7 +104,7 @@ class Spawnpoint {
         await query(sql, args)
             .then(x => x)
             .catch(err => {
-                console.error("[Spawnpoint] Error:" + err);
+                console.error('[Spawnpoint] Error:', err);
         });     
     }
 
@@ -113,7 +113,7 @@ class Spawnpoint {
      */
     toJson() {
         return {
-            type: "spawnpoint",
+            type: 'spawnpoint',
             message: {
                 id: parseInt(this.id, 16),//.toString(16),
                 lat: this.lat,
