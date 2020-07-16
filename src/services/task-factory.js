@@ -43,10 +43,16 @@ class TaskFactory {
         return this.ivCache.shift();
     }
 
+    /**
+     * Get a list of all available tasks
+     */
     getAll() {
         return this.ivCache;
     }
 
+    /**
+     * Get a task for a device
+     */
     getTask() {
         console.log('[TaskFactory] Task list:', this.ivCache.length);
         let pokemon = this.dequeue();

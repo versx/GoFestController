@@ -9,8 +9,10 @@ const app = express();
 const helmet = require('helmet');
 
 const config = require('./config.json');
-const routes = require('./routes.js');
+const RouteController = require('./services/route-controller.js');
 const WebhookController = require('./services/webhook-controller.js');
+
+const router = new RouteController();
 
 // Enable if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
 // see https://expressjs.com/en/guide/behind-proxies.html
@@ -25,7 +27,24 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Routes
-app.use('/', routes);
+app.get(['/controler', '/controller'], router.handleControllerData);
+app.post(['/controler', '/controller'], router.handleControllerData);
+
+app.get('/raw', router.handleRawData);
+app.post('/raw', router.handleRawData);
+
+app.get('/', router.handleWebhookData);
+app.post('/', router.handleWebhookData);
+
+app.get('/tasks', router.handleTasksData);
+
+/*
+router.post('/test', (req, res) => {
+    console.log('Received', req.body.length, 'webhooks from GoFestController');
+    console.log('Payload:', req.body);
+    res.send('OK');
+});
+*/
 
 // Start listener
 app.listen(config.port, config.interface, () => console.log(`Listening on port ${config.port}...`));
