@@ -2,8 +2,10 @@
 
 const moment = require('moment');
 
+const config = require('../config.json');
 const Pokestop = require('./pokestop.js');
 const Spawnpoint = require('./spawnpoint.js');
+const TaskFactory = require('../services/task-factory.js');
 const WebhookController = require('../services/webhook-controller.js');
 const query = require('../services/mysql.js');
 const { getCurrentTimestamp } = require('../utilities/utils.js');
@@ -401,6 +403,11 @@ class Pokemon {
             if (oldPokemon.pokemonId !== this.pokemonId) {
                 if (oldPokemon.pokemonId !== Pokemon.DittoPokemonId) {
                     console.log('[POKEMON] Pokemon', this.id, 'changed from', oldPokemon.pokemonId, 'to', this.pokemonId);
+                    if (config.requeueWeatherChanged) {
+                        // Re-queue weather/event changed spawns
+                        TaskFactory.instance.enqueue(this.toJson());
+                    }
+                    
                 } else if (oldPokemon.displayPokemonId || 0 !== this.pokemonId) {
                     console.log('[POKEMON] Pokemon', this.id, 'Ditto diguised as', (oldPokemon.displayPokemonId || 0), 'now seen as', this.pokemonId);
                 }
@@ -628,7 +635,7 @@ class Pokemon {
             message: {
                 spawnpoint_id: this.spawnId /* TODO: toHexString()*/ || 'None',
                 pokestop_id: this.pokestopId || 'None',
-                encounter_id: this.id,
+                encounter_id: config.randomizeEncounter ? "" : this.id,
                 pokemon_id: this.pokemonId,
                 latitude: this.lat,
                 longitude: this.lon,

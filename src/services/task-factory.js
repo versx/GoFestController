@@ -1,9 +1,13 @@
 'use strict';
 
+const config = require('../config.json');
+
 /**
  * Task/job factory for devices
  */
 class TaskFactory {
+    static instance = new TaskFactory(config.instanceName, config.minLevel, config.maxLevel);
+
     instanceName;
     minLevel;
     maxLevel;

@@ -10,7 +10,6 @@ const Pokemon = require('../models/pokemon.js');
 const TaskFactory = require('./task-factory.js');
 const { getCurrentTimestamp, base64_decode, sendResponse } = require('../utilities/utils.js');
 
-const taskFactory = new TaskFactory(config.minLevel, config.maxLevel);
 const levelCache = {};
 
 class RouteController {
@@ -85,7 +84,7 @@ class RouteController {
                 if (device.accountUsername) {
                     let account = await Account.getWithUsername(device.accountUsername, true);
                     if (account instanceof Account) {
-                        let task = taskFactory.getTask();
+                        let task = TaskFactory.instance.getTask();
                         if (task) {
                             console.log('[Controller] Sending job to check filtered IV at', task.lat, task.lon, 'for uuid', uuid);
                             sendResponse(res, 'ok', task);
@@ -382,7 +381,7 @@ class RouteController {
             if (filtered.length > 0) {
                 console.log('[Webhook] Filtered Pokemon Received:', filtered.length);
                 for (let i = 0; i < filtered.length; i++) {
-                    taskFactory.enqueue(filtered[i]);
+                    TaskFactory.instance.enqueue(filtered[i]);
                 }
             }
         }
@@ -395,7 +394,7 @@ class RouteController {
      * @param {*} res 
      */
     async handleTasksData(req, res) {
-        res.json({ tasks: taskFactory.getAll() });
+        res.json({ tasks: TaskFactory.instance.getAll() });
     }
 
     static async handleConsumables(wildPokemon, nearbyPokemon, encounters, username) {
