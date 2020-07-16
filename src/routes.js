@@ -344,13 +344,17 @@ const handleRawData = async (req, res) => {
         console.log('[Raw] Found:', wildPokemon.length, 'wild and', nearbyPokemon.length, 'nearby Pokemon and', encounters.length, 'encounters at', latTarget, lonTarget);
     }
 
-    // TODO: Handle in different thread
+    setImmediate(async () => await handleConsumables(wildPokemon, nearbyPokemon, encounters, username));
+
+    sendResponse(res, 'ok', null);
+};
+
+const handleConsumables = async (wildPokemon, nearbyPokemon, encounters, username) => {
     if (wildPokemon.length > 0) {
         for (let i = 0; i < wildPokemon.length; i++) {
             const wild = wildPokemon[i];
             const pkmn = new Pokemon({ wild: wild });
-            //console.log('Wild:', pkmn);
-            //pkmn.save(false);
+            //await pkmn.save(false);
             WebhookController.instance.addPokemonEvent(pkmn); // TODO: Remove maybe
         }
     }
@@ -358,25 +362,22 @@ const handleRawData = async (req, res) => {
         for (let i = 0; i < nearbyPokemon.length; i++) {
             const nearby = nearbyPokemon[i];
             const pkmn = new Pokemon({ nearby: nearby });
-            //console.log('Nearby:', pkmn);
-            //pkmn.save(false);
+            //await pkmn.save(false);
             WebhookController.instance.addPokemonEvent(pkmn); // TODO: Remove maybe
         }
     }
     if (encounters.length > 0) {
         console.log('[Raw] Encounters:', encounters);
-        // TODO: We only care about encounters
+        // We only really care about encounters
         for (let i = 0; i < encounters.length; i++) {
             const encounter = encounters[i];
             const pkmn = await Pokemon.getById(encounter.wild_pokemon.encounter_id);
             if (pkmn instanceof Pokemon) {
-                pkmn.addEncounter(encounter, username);
+                await pkmn.addEncounter(encounter, username);
                 await pkmn.save(true);
             }
         }
     }
-
-    sendResponse(res, 'ok', null);
 };
 
 
