@@ -14,7 +14,7 @@ ADD COLUMN `has_ticket` tinyint(1) unsigned NOT NULL DEFAULT 0;
 
 
 ## Installation  
-1.) Clone respository: `git clone https://github.com/versx/GoFestController`  
+1.) Clone respository: `git clone https://github.com/versx/GoFestController --recursive`  
 2.) Change directory to cloned folder: `cd GoFestController`  
 3.) Install dependencies: `npm install`  
 4.) Create config from example: `cp src/config.example.json src/config.json`  
