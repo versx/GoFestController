@@ -293,7 +293,6 @@ class Pokemon {
 
         this.updated = getCurrentTimestamp();
         this.changed = this.updated;
-        // TODO: Capture rates for new pokes
     }
 
     /**

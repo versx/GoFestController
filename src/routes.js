@@ -374,7 +374,6 @@ const handleRawData = async (req, res) => {
                 await pkmn.save(true);
             }
         }
-        // TODO: Check for existing, update data, s2cell stuff
     }
 
     sendResponse(res, 'ok', null);

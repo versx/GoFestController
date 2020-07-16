@@ -4,6 +4,7 @@
  * Task/job factory for devices
  */
 class TaskFactory {
+    instanceName;
     minLevel;
     maxLevel;
     ivCache;
@@ -11,7 +12,8 @@ class TaskFactory {
     /**
      * Instantiate a new TaskFactory object
      */
-    constructor(minLevel, maxLevel) {
+    constructor(instanceName, minLevel, maxLevel) {
+        this.instanceName = instanceName;
         this.minLevel = minLevel;
         this.maxLevel = maxLevel;
         if (this.ivCache === undefined || this.ivCache === null) {
@@ -53,7 +55,7 @@ class TaskFactory {
         }
         console.log('[TaskFactory] Grabbed task for', pokemon.encounter_id, 'at', pokemon.latitude, pokemon.longitude);
         return {
-            'area': 'GoFest-Test', // TODO: Instance name
+            'area': this.instanceName,
             'action': 'scan_iv',
             'lat': pokemon.latitude,
             'lon': pokemon.longitude,
