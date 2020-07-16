@@ -33,8 +33,8 @@ const handleControllerData = async (req, res) => {
         return res.sendStatus(400);
     }
     //let username = payload['username'];
-    let minLevel = parseInt(payload['min_level'] || 0);
-    let maxLevel = parseInt(payload['max_level'] || 29);
+    let minLevel = config.minLevel || 35;//parseInt(payload['min_level'] || 0);
+    let maxLevel = config.maxLevel || 40;//parseInt(payload['max_level'] || 29);
     let device = await Device.getById(uuid);
 
     console.log('[Controller]', uuid, 'received control request:', type);
@@ -83,12 +83,31 @@ const handleControllerData = async (req, res) => {
             }
             break;
         case 'get_job':
-            let task = taskFactory.getTask();
-            if (task) {
-                console.log('[Controller] Sending job to check filtered IV at', task.lat, task.lon, 'for uuid', uuid);
-                sendResponse(res, 'ok', task);
+            if (device.accountUsername) {
+                let account = await Account.getWithUsername(device.accountUsername, true);
+                if (account instanceof Account) {
+                    let task = taskFactory.getTask();
+                    if (task) {
+                        console.log('[Controller] Sending job to check filtered IV at', task.lat, task.lon, 'for uuid', uuid);
+                        sendResponse(res, 'ok', task);
+                    } else {
+                        console.warn('[Controller] No tasks available yet for uuid', uuid);
+                    }
+                } else {
+                    console.log('[Controller] Device', uuid, 'not logged into event account, logging out...');
+                    sendResponse(res, 'ok', {
+                        'action': 'switch_account',
+                        'min_level': minLevel,
+                        'max_level': maxLevel
+                    });
+                }
             } else {
-                console.warn('[Controller] No tasks available yet for uuid', uuid);
+                console.log('[Controller] Device', uuid, 'not assigned any account, switching accounts...');
+                sendResponse(res, 'ok', {
+                    'action': 'switch_account',
+                    'min_level': minLevel,
+                    'max_level': maxLevel
+                });
             }
             break;
         case 'get_account':

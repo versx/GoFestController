@@ -2,6 +2,7 @@
 
 // TODO: Redis caching for task list/webhooks
 // TODO: Priority per IV
+// TODO: Config option to randomize encounter_id after recheck
 
 const express = require('express');
 const app = express();

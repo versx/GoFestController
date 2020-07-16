@@ -73,7 +73,7 @@ class WebhookController {
                 return;
             }
             //console.debug('[WebhookController] Response:', body);
-            console.log("[WebhookController] Webhook event of", events.length, "payloads sent to", url);
+            console.log("[WebhookController] Webhook event with", events.length, "payloads sent to", url);
         });
     }
 }
