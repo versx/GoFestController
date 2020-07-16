@@ -1,6 +1,8 @@
 {
     "interface": "0.0.0.0",
     "port": 5150,
+    "minLevel": 30,
+    "maxLevel": 40,
     "filters": [
         { "atk": 15, "def": 15, "sta": 15 },
         { "atk": 0, "def": 15, "sta": 15 },

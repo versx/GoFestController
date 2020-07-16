@@ -1,19 +1,19 @@
 'use strict';
 
-// TODO Make configurable
-const MIN_LEVEL = 30;
-const MAX_LEVEL = 35;
-
 /**
- * 
+ * Task/job factory for devices
  */
 class TaskFactory {
+    minLevel;
+    maxLevel;
     ivCache;
 
     /**
      * Instantiate a new TaskFactory object
      */
-    constructor() {
+    constructor(minLevel, maxLevel) {
+        this.minLevel = minLevel;
+        this.maxLevel = maxLevel;
         if (this.ivCache === undefined || this.ivCache === null) {
             this.ivCache = [];
         }
@@ -59,8 +59,8 @@ class TaskFactory {
             'lon': pokemon.longitude,
             'id': pokemon.encounter_id,
             'is_spawnpoint': pokemon.spawnpoint_id !== undefined && pokemon.spawnpoint_id !== null,
-            'min_level': MIN_LEVEL,
-            'max_level': MAX_LEVEL
+            'min_level': this.minLevel,
+            'max_level': this.maxLevel
         };
     }
 }

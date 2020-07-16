@@ -13,7 +13,7 @@ const TaskFactory = require('./services/task-factory.js');
 const WebhookController = require('./services/webhook-controller.js');
 const { getCurrentTimestamp, base64_decode, sendResponse } = require('./utilities/utils.js');
 
-const taskFactory = new TaskFactory();
+const taskFactory = new TaskFactory(config.minLevel, config.maxLevel);
 const levelCache = {};
 
 
