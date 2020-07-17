@@ -555,7 +555,7 @@ class Pokemon {
             }
         }
 
-        // TODO: Remove VV
+        /*
         if (this.lat === undefined && this.pokestopId) {
             if (this.pokestopId) {
                 let pokestop;
@@ -581,6 +581,7 @@ class Pokemon {
                 return;
             }
         }
+        */
 
         await db.query(sql, args)
             .then(x => x)

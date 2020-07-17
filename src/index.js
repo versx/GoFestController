@@ -2,7 +2,6 @@
 
 // TODO: Redis caching for incoming webhooks for pvp data if needed?
 // TODO: Priority per IV
-// TODO: Config option to randomize encounter_id after recheck
 
 const express = require('express');
 const app = express();
@@ -38,13 +37,11 @@ app.post('/', router.handleWebhookData);
 
 app.get('/tasks', router.handleTasksData);
 
-/*
 app.post('/test', (req, res) => {
     console.log('Received', req.body.length, 'webhooks from GoFestController');
     console.log('Payload:', req.body);
     res.send('OK');
 });
-*/
 
 // Start listener
 app.listen(config.port, config.interface, () => console.log(`Listening on port ${config.port}...`));

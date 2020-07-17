@@ -2,7 +2,7 @@
 
 const config = require('../config.json');
 const MySQLConnector = require('../services/mysql.js');
-const db = new MySQLConnector(config.db.rdm);
+const db = new MySQLConnector(config.db.gfc);
 
 /**
  * Device model class.
@@ -11,7 +11,6 @@ class Device {
     uuid;
     instanceName;
     accountUsername;
-    deviceLevel;
     lastHost;
     lastSeen;
     lastLat;
@@ -22,17 +21,15 @@ class Device {
      * @param uuid 
      * @param instanceName 
      * @param accountUsername 
-     * @param deviceLevel 
      * @param lastHost 
      * @param lastSeen 
      * @param lastLat 
      * @param lastLon 
      */
-    constructor(uuid, instanceName, accountUsername, deviceLevel, lastHost, lastSeen, lastLat, lastLon) {
+    constructor(uuid, instanceName, accountUsername, lastHost, lastSeen, lastLat, lastLon) {
         this.uuid = uuid;
         this.instanceName = instanceName;
         this.accountUsername = accountUsername;
-        this.deviceLevel = deviceLevel;
         this.lastHost = lastHost;
         this.lastSeen = lastSeen;
         this.lastLat = lastLat;
@@ -44,7 +41,7 @@ class Device {
      */
     static async getAll() {
         let sql = `
-        SELECT uuid, instance_name, account_username, device_level, last_host, last_seen, last_lat, last_lon
+        SELECT uuid, instance_name, account_username, last_host, last_seen, last_lat, last_lon
         FROM device
         `;
         let results = await db.query(sql)
@@ -61,7 +58,6 @@ class Device {
                     key.uuid,
                     key.instance_name,
                     key.account_username,
-                    key.device_level,
                     key.last_host,
                     key.last_seen,
                     key.last_lat,
@@ -79,7 +75,7 @@ class Device {
      */
     static async getById(uuid) {
         let sql = `
-        SELECT uuid, instance_name, account_username, device_level, last_host, last_seen, last_lat, last_lon
+        SELECT uuid, instance_name, account_username, last_host, last_seen, last_lat, last_lon
         FROM device
         WHERE uuid = ?
         LIMIT 1
@@ -98,7 +94,6 @@ class Device {
                     key.uuid,
                     key.instance_name,
                     key.account_username,
-                    key.device_level || 0,
                     key.last_host || '',
                     key.last_seen || 0,
                     key.last_lat || 0.0,
@@ -164,10 +159,10 @@ class Device {
      */
     async create() {
         let sql = `
-        INSERT INTO device (uuid, instance_name, account_username, device_level, last_host, last_seen, last_lat, last_lon)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO device (uuid, instance_name, account_username, last_host, last_seen, last_lat, last_lon)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
-        let args = [this.uuid, this.instanceName, this.accountUsername, this.deviceLevel, this.lastHost, this.lastSeen, this.lastLat, this.lastLon];
+        let args = [this.uuid, this.instanceName, this.accountUsername, this.lastHost, this.lastSeen, this.lastLat, this.lastLon];
         let results = await db.query(sql, args)
             .then(x => x)
             .catch(err => {
@@ -183,10 +178,10 @@ class Device {
     async save(oldUUID = '') {
        let sql = `
        UPDATE device 
-       SET uuid = ?, instance_name = ?, account_username = ?, device_level = ?, last_host = ?, last_seen = ?, last_lat = ?, last_lon = ?
+       SET uuid = ?, instance_name = ?, account_username = ?, last_host = ?, last_seen = ?, last_lat = ?, last_lon = ?
        WHERE uuid = ?
        `;
-       let args = [this.uuid, this.instanceName, this.accountUsername, this.deviceLevel, this.lastHost, this.lastSeen || 0, this.lastLat || 0, this.lastLon || 0, oldUUID];
+       let args = [this.uuid, this.instanceName, this.accountUsername, this.lastHost, this.lastSeen || 0, this.lastLat || 0, this.lastLon || 0, oldUUID];
        let results = await db.query(sql, args)
            .then(x => x)
            .catch(err => {

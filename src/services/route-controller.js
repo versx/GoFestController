@@ -60,7 +60,7 @@ class RouteController {
                 } else {
                     // Register new device
                     console.log('[Controller] Registering device');
-                    let newDevice = new Device(uuid, null, null, 0, null, 0, 0.0, 0.0, null);
+                    let newDevice = new Device(uuid, config.instanceName, null, null, getCurrentTimestamp(), 0.0, 0.0);
                     await newDevice.create();
                     sendResponse(res, 'ok', {
                         assigned: false,
@@ -81,7 +81,7 @@ class RouteController {
                 }
                 break;
             case 'get_job':
-                if (device.accountUsername) {
+                if (device && device.accountUsername) {
                     let account = await Account.getWithUsername(device.accountUsername, true);
                     if (account instanceof Account) {
                         let task = TaskFactory.instance.getTask();
@@ -418,7 +418,7 @@ class RouteController {
             // We only really care about encounters
             for (let i = 0; i < encounters.length; i++) {
                 const encounter = encounters[i];
-                const pkmn = await Pokemon.getById(encounter.wild_pokemon.encounter_id);
+                const pkmn = await Pokemon.getById(BigInt(encounter.wild_pokemon.encounter_id).toString());
                 if (pkmn instanceof Pokemon) {
                     await pkmn.addEncounter(encounter, username);
                     await pkmn.save(true);

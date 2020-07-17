@@ -1,6 +1,6 @@
 'use strict';
 
-const request = require('request');
+const axios = require('axios');
 const config = require('../config.json');
 const WebhookRelayInterval = 1000;
 
@@ -57,8 +57,7 @@ class WebhookController {
         let options = {
             url: url,
             method: 'POST',
-            json: true,
-            body: events,
+            data: events,
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -66,15 +65,14 @@ class WebhookController {
                 'User-Agent': 'GoFestController'
             }
         };
-        // TODO: Use axios instead
-        request(options, (err, res, body) => {
-            if (err) { //throw err;
-                console.error('[WebhookController] Error:', err);
-                return;
-            }
-            //console.debug('[WebhookController] Response:', body);
-            console.log("[WebhookController] Webhook event with", events.length, "payloads sent to", url);
-        });
+        axios(options)
+            .then(x => console.log('[WebhookController] Webhook event with', events.length, 'payloads sent to', url))
+            .catch(err => {
+                if (err) {
+                    console.error('[WebhookController] Error:', err);
+                    return;
+                }
+            });
     }
 }
 
