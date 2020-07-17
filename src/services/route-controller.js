@@ -394,8 +394,50 @@ class RouteController {
      * @param {*} res 
      */
     async handleTasksData(req, res) {
-        // TODO: Make pretty
-        res.json({ tasks: TaskFactory.instance.getAll() });
+        const tasks = TaskFactory.instance.getAll();
+        let html = `
+        <style>
+        table, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th {
+            border: 1px solid white;
+            border-collapse: collapse;
+        }
+        table {
+            border-spacing: 5px;
+        }
+        th, td {
+            padding: 15px;
+            vertical-align: middle;
+            horizontal-align: middle;
+            text-align: center;
+        }
+        </style>
+        <table style='width:100%'>
+          <tr style='background: rgb(33, 37, 41); color: white;'>
+            <th>Encounter</th>
+            <th>Pokemon</th>
+            <th>Form</th>
+            <th>Stats</th>
+            <th>Location</th>
+          </tr>
+        `;
+        for (let i = 0; i < tasks.length; i++) {
+            let task = tasks[i];
+            html += `
+            <tr>
+              <td>${task.encounter_id}</td>
+              <td>${task.pokemon_id}</td>
+              <td>${task.form}</td>
+              <td>${task.individual_attack}/${task.individual_defense}/${task.individual_stamina}</td>
+              <td>${task.latitude}, ${task.longitude}</td>
+            </tr>
+            `;
+        }
+        html += '</table>';
+        res.send(html);
     }
 
     static async handleConsumables(wildPokemon, nearbyPokemon, encounters, username) {
@@ -426,7 +468,6 @@ class RouteController {
                     await pkmn.save(true);
                     //WebhookController.instance.addPokemonEvent(pkmn);
                 } else {
-                    // TODO: Get cell id
                     let newPokemon = new Pokemon({ wild: encounter.wild_pokemon });
                     await newPokemon.addEncounter(encounter, username);
                     await newPokemon.save(true);
