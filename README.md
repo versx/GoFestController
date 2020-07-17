@@ -7,7 +7,6 @@ Backend to facilitate re-checking a Pokemon spawn with an event ticket account.
 - [RealDeviceMap](https://github.com/realdevicemap/realdevicemap) instance  
 - New database for GoFestController (i.e. gfc, gfcdb, etc..)  
 - Run the `schema.sql` migration file against your new GoFestController database  
-- Add your event accounts to the database and change `has_ticket` to `1`  
 
 
 ## Installation  
