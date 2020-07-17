@@ -1,6 +1,8 @@
 'use strict';
 
-const query = require('../services/mysql.js');
+const config = require('../config.json');
+const MySQLConnector = require('../services/mysql.js');
+const db = new MySQLConnector(config.db.rdm);
 const { getCurrentTimestamp } = require('../utilities/utils.js');
 
 /**
@@ -36,7 +38,7 @@ class Spawnpoint {
             WHERE id = ?
         `;
         let args = [spawnpointId];
-        let result = await query(sql, args)
+        let result = await db.query(sql, args)
             .then(x => x)
             .catch(err => {
                 console.error('[Spawnpoint] Error:', err);
@@ -101,7 +103,7 @@ class Spawnpoint {
             `;
         }
         let args = [this.id, this.lat, this.lon, this.despawnSecond || null];
-        await query(sql, args)
+        await db.query(sql, args)
             .then(x => x)
             .catch(err => {
                 console.error('[Spawnpoint] Error:', err);

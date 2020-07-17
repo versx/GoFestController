@@ -1,6 +1,8 @@
 'use strict';
 
-const query = require('../services/mysql.js');
+const config = require('../config.json');
+const MySQLConnector = require('../services/mysql.js');
+const db = new MySQLConnector(config.db.gfc);
 
 /**
  * Account model class.
@@ -60,11 +62,11 @@ class Account {
         SELECT username, password, level, first_warning_timestamp, failed_timestamp, failed, last_encounter_lat, last_encounter_lon, last_encounter_time, has_ticket
         FROM account
         LEFT JOIN device ON username = account_username
-        WHERE first_warning_timestamp is NULL AND failed_timestamp is NULL and device.uuid IS NULL AND level >= ? AND level <= ? AND failed IS NULL AND (last_encounter_time IS NULL OR UNIX_TIMESTAMP() - CAST(last_encounter_time AS SIGNED INTEGER) >= 7200 AND spins < 400) AND has_ticket = ?
+        WHERE first_warning_timestamp is NULL AND failed_timestamp is NULL and device.uuid IS NULL AND level >= ? AND level <= ? AND failed IS NULL AND (last_encounter_time IS NULL OR UNIX_TIMESTAMP() - CAST(last_encounter_time AS SIGNED INTEGER) >= 7200) AND has_ticket = ?
         ORDER BY level DESC, RAND()
         LIMIT 1
         `;
-        let result = await query(sql, [minLevel, maxLevel, hasTicket])
+        let result = await db.query(sql, [minLevel, maxLevel, hasTicket])
             .then(x => x)
             .catch(err => { 
                 console.error('[Account] Failed to get new Account', err);
@@ -103,7 +105,7 @@ class Account {
         LIMIT 1
         `;
         let args = [username, hasTicket];
-        let result = await query(sql, args)
+        let result = await db.query(sql, args)
             .then(x => x)
             .catch(err => { 
                 console.error('[Account] Failed to get Account with username', username, 'Error:', err);
@@ -142,7 +144,7 @@ class Account {
         WHERE username = ?
         `;
         let args = [newLat, newLon, encounterTime, username];
-        let result = await query(sql, args)
+        let result = await db.query(sql, args)
             .then(x => x)
             .catch(err => {
                 console.error('[Account] Failed to set encounter info for account with username', username, 'Error:', err);
@@ -163,7 +165,7 @@ class Account {
         WHERE username = ?
         `;
         let args = [level, username];
-        let result = await query(sql, args)
+        let result = await db.query(sql, args)
             .then(x => x)
             .catch(err => { 
                 console.error('[Account] Failed to set Account level for username', username, 'Error:', err);
@@ -172,23 +174,6 @@ class Account {
         //console.log('[Account] SetLevel:', result);
     }
 
-    static async setInstanceUuid(uuid, area, username) {
-        let sql = `
-        UPDATE account
-        SET last_uuid = ?,
-            last_instance = ?
-        WHERE username = ?
-        `;
-        let args = [uuid, area, username];
-        let result = await query(sql, args)
-            .then(x => x)
-            .catch(err => { 
-                console.error('[Account] Failed to set Account intance for username', username, 'and device', uuid, 'Error:', err);
-                return null;
-            });
-        console.log('[Account] SetInstanceUuid:', result);
-    }
-    
     /**
      * Save account.
      * @param update 
@@ -211,7 +196,7 @@ class Account {
             `;
             args = [this.username, this.password, this.level, this.firstWarningTimestamp, this.failedTimestamp, this.failed, this.lastEncounterLat, this.lastEncounterLon, this.lastEncounterTime, this.hasTicket];
         }
-        let result = await query(sql, args)
+        let result = await db.query(sql, args)
             .then(x => x)
             .catch(err => {
                 console.error('[Account] Error:', err);

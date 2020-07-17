@@ -208,7 +208,6 @@ class RouteController {
                         if (device.accountUsername === null) {
                             return res.sendStatus(404);
                         }
-                        await Account.setInstanceUuid(device.uuid, device.instanceName, device.accountUsername);
                         device.accountUsername = null;
                         await device.save(device.uuid);
                         sendResponse(res, 'ok', null);

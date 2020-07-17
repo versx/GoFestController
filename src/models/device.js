@@ -1,6 +1,8 @@
 'use strict';
 
-const query = require('../services/mysql.js');
+const config = require('../config.json');
+const MySQLConnector = require('../services/mysql.js');
+const db = new MySQLConnector(config.db.rdm);
 
 /**
  * Device model class.
@@ -45,7 +47,7 @@ class Device {
         SELECT uuid, instance_name, account_username, device_level, last_host, last_seen, last_lat, last_lon
         FROM device
         `;
-        let results = await query(sql)
+        let results = await db.query(sql)
             .then(x => x)
             .catch(err => {
                 console.error('[Device] Error:', err);
@@ -83,7 +85,7 @@ class Device {
         LIMIT 1
         `;
         let args = [uuid];
-        let result = await query(sql, args)
+        let result = await db.query(sql, args)
             .then(x => x)
             .catch(err => { 
                 console.error('[Device] Failed to get Device with uuid', uuid, 'Error:', err);
@@ -120,7 +122,7 @@ class Device {
         WHERE uuid = ?
         `;
         let args = [lat, lon, uuid];
-        let results = await query(sql, args)
+        let results = await db.query(sql, args)
             .then(x => x)
             .catch(err => {
                 console.error('[Device] Error:', err);
@@ -149,7 +151,7 @@ class Device {
             `;
         }
         let args = [host, uuid];
-        let results = await query(sql, args)
+        let results = await db.query(sql, args)
             .then(x => x)
             .catch(err => {
                 console.error('[Device] Error:', err);
@@ -166,7 +168,7 @@ class Device {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
         let args = [this.uuid, this.instanceName, this.accountUsername, this.deviceLevel, this.lastHost, this.lastSeen, this.lastLat, this.lastLon];
-        let results = await query(sql, args)
+        let results = await db.query(sql, args)
             .then(x => x)
             .catch(err => {
                 console.error('[Device] Error:', err);
@@ -185,7 +187,7 @@ class Device {
        WHERE uuid = ?
        `;
        let args = [this.uuid, this.instanceName, this.accountUsername, this.deviceLevel, this.lastHost, this.lastSeen || 0, this.lastLat || 0, this.lastLon || 0, oldUUID];
-       let results = await query(sql, args)
+       let results = await db.query(sql, args)
            .then(x => x)
            .catch(err => {
                console.error('[Device] Error:', err);

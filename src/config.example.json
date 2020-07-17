@@ -22,12 +22,22 @@
         { "atk": 0, "def": 0,  "sta": 0 }
     ],
     "db": {
-        "host": "127.0.0.1",
-        "port": 3306,
-        "username": "user123",
-        "password": "pass123",
-        "database": "rdmdb",
-        "charset": "utf8mb4"
+        "rdm": {
+            "host": "127.0.0.1",
+            "port": 3306,
+            "username": "user123",
+            "password": "pass123",
+            "database": "rdmdb",
+            "charset": "utf8mb4"
+        },
+        "gfc": {
+            "host": "127.0.0.1",
+            "port": 3306,
+            "username": "user123",
+            "password": "pass123",
+            "database": "gfcdb",
+            "charset": "utf8mb4"
+        }
     },
     "webhooks": {
         "enabled": false,

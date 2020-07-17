@@ -7,8 +7,10 @@ const Pokestop = require('./pokestop.js');
 const Spawnpoint = require('./spawnpoint.js');
 const TaskFactory = require('../services/task-factory.js');
 const WebhookController = require('../services/webhook-controller.js');
-const query = require('../services/mysql.js');
+const MySQLConnector = require('../services/mysql.js');
 const { getCurrentTimestamp, generateEncounterId } = require('../utilities/utils.js');
+
+const db = new MySQLConnector(config.db.rdm);
 
 class Pokemon {
     static DittoPokemonId = 132;
@@ -186,7 +188,7 @@ class Pokemon {
             LIMIT 1
         `;
         let args = [encounterId.toString()];
-        let results = await query(sql, args)
+        let results = await db.query(sql, args)
             .then(x => x)
             .catch(err => {
                 console.error('[Pokemon] Error: ' + err);
@@ -580,7 +582,7 @@ class Pokemon {
             }
         }
 
-        await query(sql, args)
+        await db.query(sql, args)
             .then(x => x)
             .catch(err => {
                 console.log('[Pokemon] SQL:', sql);

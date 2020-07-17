@@ -1,6 +1,8 @@
 'use strict';
 
-const query = require('../services/mysql.js');
+const config = require('../config.json');
+const MySQLConnector = require('../services/mysql.js');
+const db = new MySQLConnector(config.db.rdm);
 
 /**
  * Pokestop model class.
@@ -44,7 +46,7 @@ class Pokestop {
         LIMIT 1
         `;
         let args = [pokestopId];
-        let results = await query(sql, args)
+        let results = await db.query(sql, args)
             .then(x => x)
             .catch(err => {
                 console.error('[Pokestop] Error:', err);
