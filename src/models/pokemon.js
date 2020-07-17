@@ -636,7 +636,7 @@ class Pokemon {
         return {
             type: 'pokemon',
             message: {
-                spawnpoint_id: this.spawnId /* TODO: toHexString()*/ || 'None',
+                spawnpoint_id: this.spawnId.toString(16) || 'None',
                 pokestop_id: this.pokestopId || 'None',
                 encounter_id: config.randomizeEncounter ? generateEncounterId() : this.id,
                 pokemon_id: this.pokemonId,
