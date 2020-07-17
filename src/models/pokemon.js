@@ -600,6 +600,12 @@ class Pokemon {
      * Get Pokemon as JSON message for webhook payload
      */
     toJson() {
+        // Get pvp stats from PVP cache if IV stats are the same
+        let pvpRanks = TaskFactory.pvpCache.filter(x => x.encounter_id === this.id &&
+                                                        x.individual_attack === this.atkIv &&
+                                                        x.individual_defense === this.defIv &&
+                                                        x.individual_stamina === this.staIv);
+        //console.log('PvP Ranks:', pvpRanks.length);
         return {
             type: 'pokemon',
             message: {
@@ -632,8 +638,8 @@ class Pokemon {
                 capture_1: this.capture1,
                 capture_2: this.capture2,
                 capture_3: this.capture3,
-                pvp_rankings_great_league: this.pvpRankingsGreatLeague,
-                pvp_rankings_ultra_league: this.pvpRankingsUltraLeague,
+                pvp_rankings_great_league: this.pvpRankingsGreatLeague || pvpRanks ? pvpRanks.pvp_rankings_great_league : null,
+                pvp_rankings_ultra_league: this.pvpRankingsUltraLeague || pvpRanks ? pvpRanks.pvp_rankings_ultra_league : null,
                 is_event: true
             }
         }

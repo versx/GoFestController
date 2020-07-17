@@ -8,6 +8,7 @@ const config = require('../config.json');
 class TaskFactory {
     static instance = new TaskFactory(config.instanceName, config.minLevel, config.maxLevel);
     static ivCache = [];
+    static pvpCache = [];
 
     instanceName;
     minLevel;
@@ -60,6 +61,7 @@ class TaskFactory {
         if (pokemon === undefined || pokemon === null) {
             return null;
         }
+        TaskFactory.pvpCache.push(pokemon);
         console.log('[TaskFactory] Grabbed task for', pokemon.encounter_id, 'at', pokemon.latitude, pokemon.longitude);
         return {
             'area': this.instanceName,
