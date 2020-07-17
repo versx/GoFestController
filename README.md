@@ -92,12 +92,12 @@ Backend to facilitate re-checking a Pokemon spawn with an event ticket account.
 
 
 ## Available Endpoints  
-GET /
-GET /raw
-POST /raw
-GET /controler
-POST /controler
-GET /controller
-POST /controller
-GET /tasks
-GET /test (test endpoint for GFC webhook relay)
+GET /  
+GET /raw  
+POST /raw  
+GET /controler  
+POST /controler  
+GET /controller  
+POST /controller  
+GET /tasks  
+GET /test (test endpoint for GFC webhook relay)  
