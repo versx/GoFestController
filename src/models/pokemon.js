@@ -3,6 +3,7 @@
 const moment = require('moment');
 
 const config = require('../config.json');
+const Cell = require('./cell.js');
 const Pokestop = require('./pokestop.js');
 const Spawnpoint = require('./spawnpoint.js');
 const TaskFactory = require('../services/task-factory.js');
@@ -142,8 +143,11 @@ class Pokemon {
             }
         }
         this.spawnId = spawnId;
-        // TODO: Get cell id
-        this.cellId = BigInt(data.wild.cell).toString();
+        if (data.wild.cell === undefined || data.wild.cell === null) {
+            data.wild.cell = Cell.getCellIdFromLatLon(this.lat, this.lon);
+        } else {
+            this.cellId = BigInt(data.wild.cell).toString();
+        }
     }
 
     async initNearby(data) {
