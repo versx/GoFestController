@@ -21,7 +21,7 @@ Backend to facilitate re-checking a Pokemon spawn with an event ticket account.
 
 
 ## Importing Accounts  
-1.) Create `.csv` file with event accounts to import i.e. `accounts.csv`  
+1.) Create `.csv` file with event accounts to import i.e. `accounts.csv` (Format: `username,password`)  
 2.) Start account importer `npm run import -- /path/to/accounts.csv`  
 
 
