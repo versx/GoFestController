@@ -97,12 +97,12 @@ Backend to facilitate re-checking a Pokemon spawn with an event ticket account.
 
 
 ## Available Endpoints  
-GET /  
-GET /raw  
-POST /raw  
-GET /controler  
-POST /controler  
-GET /controller  
-POST /controller  
-GET /tasks  
+GET / - (incoming RDM webhooks endpoint)  
+GET /raw (incoming GFC raw data endpoint)  
+POST /raw (incoming GFC raw data endpoint)  
+GET /controler (support for typflo controller endpoint)  
+POST /controler (support for typflo controller endpoint)  
+GET /controller (support for controller endpoint)  
+POST /controller (support for controller endpoint)  
+GET /tasks (table of queued tasks)  
 GET /test (test endpoint for GFC webhook relay)  
