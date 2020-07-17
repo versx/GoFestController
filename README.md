@@ -17,6 +17,7 @@ Backend to facilitate re-checking a Pokemon spawn with an event ticket account.
 4.) Create config from example: `cp src/config.example.json src/config.json`  
 5.) Edit/fill out config: `vi src/config.json`  
 6.) Start `npm run start`  
+7.) Add GoFestController endpoint to RDM webhook urls i.e. `http://gfcip:5150`  
 
 
 ## Configuration  
@@ -89,3 +90,15 @@ Backend to facilitate re-checking a Pokemon spawn with an event ticket account.
     }
 }
 ```
+
+
+## Available Endpoints  
+GET /  
+GET /raw  
+POST /raw  
+GET /controler  
+POST /controler  
+GET /controller  
+POST /controller  
+GET /tasks  
+GET /test (test endpoint for GFC webhook relay)  
