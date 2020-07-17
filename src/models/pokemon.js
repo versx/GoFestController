@@ -102,24 +102,25 @@ class Pokemon {
     }
 
     async initWild(data) {
-        this.id = data.wild.data.encounter_id.toString();
-        //console.log('Wild Pokemon Data:', data.wild.data.pokemon_data);
-        this.pokemonId = data.wild.data.pokemon_data.pokemon_id;
-        if (data.wild.data.latitude === undefined || data.wild.data.latitude === null) {
+        this.id = data.wild.encounter_id.toString();
+        //console.log('Wild Pokemon Data:', data.wild.pokemon_data);
+        this.pokemonId = data.wild.pokemon_data.pokemon_id;
+        if (data.wild.latitude === undefined || data.wild.latitude === null) {
             console.debug('[Pokemon] Wild Pokemon null lat/lon!');
         }
-        this.lat = data.wild.data.latitude;
-        this.lon = data.wild.data.longitude;
-        let spawnId = BigInt(parseInt(data.wild.data.spawn_point_id, 16)).toString();//parseInt(data.wild.data.spawn_point_id, 16).toString();
-        this.gender = data.wild.data.pokemon_data.pokemon_display.gender;
-        this.form = data.wild.data.pokemon_data.pokemon_display.form;
-        if (data.wild.data.pokemon_data.pokemon_display) {
-            this.costume = data.wild.data.pokemon_data.pokemon_display.costume;
-            this.weather = data.wild.data.pokemon_data.pokemon_display.weather_boosted_condition;
+        this.lat = data.wild.latitude;
+        this.lon = data.wild.longitude;
+        let spawnId = BigInt(parseInt(data.wild.spawn_point_id, 16)).toString();
+        this.gender = data.wild.pokemon_data.pokemon_display.gender;
+        this.form = data.wild.pokemon_data.pokemon_display.form;
+        if (data.wild.pokemon_data.pokemon_display) {
+            this.costume = data.wild.pokemon_data.pokemon_display.costume;
+            this.weather = data.wild.pokemon_data.pokemon_display.weather_boosted_condition;
         }
         this.username = data.wild.username;
-        if (data.wild.data.time_till_hidden_ms > 0 && data.wild.data.time_till_hidden_ms <= 90000) {
-            this.expireTimestamp = Math.round(data.wild.timestamp_ms / 1000 + data.wild.data.time_till_hidden_ms);
+        let currentTimestamp = getCurrentTimestamp() * 1000;
+        if (data.wild.time_till_hidden_ms > 0 && data.wild.time_till_hidden_ms <= 90000) {
+            this.expireTimestamp = Math.round(currentTimestamp / 1000 + data.wild.time_till_hidden_ms);
             this.expireTimestampVerified = true;
         } else {
             this.expireTimestampVerified = false;
@@ -133,7 +134,7 @@ class Pokemon {
                 spawnpoint = null;
             }
             if (spawnpoint instanceof Spawnpoint) {
-                let expireTimestamp = this.getDespawnTimer(spawnpoint, data.wild.timestamp_ms);
+                let expireTimestamp = this.getDespawnTimer(spawnpoint, currentTimestamp);
                 if (expireTimestamp > 0) {
                     this.expireTimestamp = expireTimestamp;
                     this.expireTimestampVerified = true;
@@ -141,6 +142,7 @@ class Pokemon {
             }
         }
         this.spawnId = spawnId;
+        // TODO: Get cell id
         this.cellId = BigInt(data.wild.cell).toString();
     }
 
@@ -285,7 +287,7 @@ class Pokemon {
         }
 
         if (this.spawnId === undefined) {
-            this.spawnId = BigInt(encounter.wild_pokemon.spawn_point_id).toString();//parseInt(encounter.wild_pokemon.spawn_point_id, 16).toString();
+            this.spawnId = BigInt(parseInt(encounter.wild_pokemon.spawn_point_id, 16)).toString();//parseInt(encounter.wild_pokemon.spawn_point_id, 16).toString();
             this.lat = encounter.wild_pokemon.latitude;
             this.lon = encounter.wild_pokemon.longitude;
 
@@ -429,7 +431,6 @@ class Pokemon {
             let changedSQL
             if (updateIV && (oldPokemon.atkIv === undefined || oldPokemon.atkIv === null) && this.atkIv) {
                 WebhookController.instance.addPokemonEvent(this);
-                //InstanceController.instance.gotIV(this);
                 bindChangedTimestamp = false;
                 changedSQL = 'UNIX_TIMESTAMP()';
             } else {
@@ -460,12 +461,6 @@ class Pokemon {
                     }
                 }
             }
-
-            // TODO: Impl `shouldWrite` Pokemon method
-            //let shouldWrite = Pokemon.shouldUpdate(oldPokemon, this);
-            //if (!shouldWrite) {
-            //    return;
-            //}
 
             let ivSQL
             if (updateIV) {
@@ -555,34 +550,6 @@ class Pokemon {
             }
         }
 
-        /*
-        if (this.lat === undefined && this.pokestopId) {
-            if (this.pokestopId) {
-                let pokestop;
-                try {
-                    pokestop = await Pokestop.getById(this.pokestopId);
-                } catch (err) {
-                    console.error(err);
-                }
-                if (pokestop) {
-                    this.lat = pokestop.lat;
-                    this.lon = pokestop.lon;
-                    if (oldPokemon) {
-                        args[1] = this.lat;
-                        args[2] = this.lon;
-                    } else {
-                        args[2] = this.lat;
-                        args[3] = this.lon;
-                    }
-                } else {
-                    return;
-                }
-            } else {
-                return;
-            }
-        }
-        */
-
         await db.query(sql, args)
             .then(x => x)
             .catch(err => {
@@ -594,15 +561,11 @@ class Pokemon {
 
         if (oldPokemon === undefined || oldPokemon === null) {
             WebhookController.instance.addPokemonEvent(this);
-            //InstanceController.instance.gotPokemon(this);
-            //if (this.atkIv) {
-            //    InstanceController.instance.gotIV(this);
-            //}
         }
     }
 
     /**
-     * 
+     * Calculate despawn timer of spawnpoint
      * @param spawnpoint 
      * @param timestampMs 
      */
@@ -636,7 +599,7 @@ class Pokemon {
         return {
             type: 'pokemon',
             message: {
-                spawnpoint_id: this.spawnId.toString(16) || 'None',
+                spawnpoint_id: this.spawnId ? this.spawnId.toString(16) : 'None',
                 pokestop_id: this.pokestopId || 'None',
                 encounter_id: config.randomizeEncounter ? generateEncounterId() : this.id,
                 pokemon_id: this.pokemonId,

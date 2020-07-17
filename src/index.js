@@ -2,6 +2,7 @@
 
 // TODO: Redis caching for incoming webhooks for pvp data if needed?
 // TODO: Priority per IV
+// TODO: Check if wild/nearby is ultra rare Pokemon and save to database then queue for IV check
 
 const express = require('express');
 const app = express();

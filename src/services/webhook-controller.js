@@ -1,6 +1,7 @@
 'use strict';
 
 const axios = require('axios');
+//const request = require('request');
 const config = require('../config.json');
 const WebhookRelayInterval = 1000;
 
@@ -44,7 +45,7 @@ class WebhookController {
                 let pokemonEvent = this.pokemonEvents.pop()
                 events.push(pokemonEvent.toJson());
             }
-            if (events && events.length > 0) {
+            if (events.length > 0) {
                 this.urls.forEach(url => this.sendEvents(events, url));
             }
         }
@@ -73,6 +74,28 @@ class WebhookController {
                     return;
                 }
             });
+        /*
+        let options = {
+            url: url,
+            method: 'POST',
+            json: true,
+            body: events,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-cache',
+                'User-Agent': 'GoFestController'
+            }
+        };
+        request(options, (err, res, body) => {
+            if (err) { //throw err;
+                console.error('[WebhookController] Error:', err);
+                return;
+            }
+            //console.debug('[WebhookController] Response:', body);
+            console.log("[WebhookController] Webhook event with", events.length, "payloads sent to", url);
+        });
+        */
     }
 }
 

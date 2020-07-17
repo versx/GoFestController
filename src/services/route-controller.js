@@ -8,6 +8,7 @@ const Account = require('../models/account.js');
 const Device = require('../models/device.js');
 const Pokemon = require('../models/pokemon.js');
 const TaskFactory = require('./task-factory.js');
+const WebhookController = require('./webhook-controller.js');
 const { getCurrentTimestamp, base64_decode, sendResponse } = require('../utilities/utils.js');
 
 const levelCache = {};
@@ -393,6 +394,7 @@ class RouteController {
      * @param {*} res 
      */
     async handleTasksData(req, res) {
+        // TODO: Make pretty
         res.json({ tasks: TaskFactory.instance.getAll() });
     }
 
@@ -400,7 +402,7 @@ class RouteController {
         if (wildPokemon.length > 0) {
             for (let i = 0; i < wildPokemon.length; i++) {
                 const wild = wildPokemon[i];
-                const pkmn = new Pokemon({ wild: wild });
+                //const pkmn = new Pokemon({ wild: wild.data });
                 //await pkmn.save(false);
                 //WebhookController.instance.addPokemonEvent(pkmn);
             }
@@ -408,7 +410,7 @@ class RouteController {
         if (nearbyPokemon.length > 0) {
             for (let i = 0; i < nearbyPokemon.length; i++) {
                 const nearby = nearbyPokemon[i];
-                const pkmn = new Pokemon({ nearby: nearby });
+                //const pkmn = new Pokemon({ nearby: nearby });
                 //await pkmn.save(false);
                 //WebhookController.instance.addPokemonEvent(pkmn);
             }
@@ -422,6 +424,13 @@ class RouteController {
                 if (pkmn instanceof Pokemon) {
                     await pkmn.addEncounter(encounter, username);
                     await pkmn.save(true);
+                    //WebhookController.instance.addPokemonEvent(pkmn);
+                } else {
+                    // TODO: Get cell id
+                    let newPokemon = new Pokemon({ wild: encounter.wild_pokemon });
+                    await newPokemon.addEncounter(encounter, username);
+                    await newPokemon.save(true);
+                    //WebhookController.instance.addPokemonEvent(newPokemon);
                 }
             }
         }

@@ -7,11 +7,11 @@ const config = require('../config.json');
  */
 class TaskFactory {
     static instance = new TaskFactory(config.instanceName, config.minLevel, config.maxLevel);
+    static ivCache = [];
 
     instanceName;
     minLevel;
     maxLevel;
-    ivCache;
 
     /**
      * Instantiate a new TaskFactory object
@@ -20,16 +20,13 @@ class TaskFactory {
         this.instanceName = instanceName;
         this.minLevel = minLevel;
         this.maxLevel = maxLevel;
-        if (this.ivCache === undefined || this.ivCache === null) {
-            this.ivCache = [];
-        }
     }
 
     /**
      * Get the length of the IV cache queue
      */
     length() {
-        return this.ivCache.length;
+        return TaskFactory.ivCache.length;
     }
 
     /**
@@ -37,28 +34,28 @@ class TaskFactory {
      * @param {*} payload 
      */
     enqueue(payload) {
-        this.ivCache.push(payload.message);
+        TaskFactory.ivCache.push(payload.message);
     }
 
     /**
      * Remove an element from the beginning of the queue
      */
     dequeue() {
-        return this.ivCache.shift();
+        return TaskFactory.ivCache.shift();
     }
 
     /**
      * Get a list of all available tasks
      */
     getAll() {
-        return this.ivCache;
+        return TaskFactory.ivCache;
     }
 
     /**
      * Get a task for a device
      */
     getTask() {
-        console.log('[TaskFactory] Task list:', this.ivCache.length);
+        console.log('[TaskFactory] Task list:', TaskFactory.ivCache.length);
         let pokemon = this.dequeue();
         if (pokemon === undefined || pokemon === null) {
             return null;
