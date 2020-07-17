@@ -5,11 +5,8 @@ Backend to facilitate re-checking a Pokemon spawn with an event ticket account.
 
 ## Prerequisites  
 - [RealDeviceMap](https://github.com/realdevicemap/realdevicemap) instance  
-- Run the following against your RealDeviceMap database account table:
-```sql
-ALTER TABLE `account`
-ADD COLUMN `has_ticket` tinyint(1) unsigned NOT NULL DEFAULT 0;
-```
+- New database for GoFestController (i.e. gfc, gfcdb, etc..)  
+- Run the `schema.sql` migration file against your new GoFestController database  
 - Add your event accounts to the database and change `has_ticket` to `1`  
 
 
@@ -50,18 +47,36 @@ ADD COLUMN `has_ticket` tinyint(1) unsigned NOT NULL DEFAULT 0;
     ],
     // RealDeviceMap database
     "db": {
-        // Database IP address/FQDN
-        "host": "127.0.0.1",
-        // Database listening port
-        "port": 3306,
-        // Database account username
-        "username": "user123",
-        // Database account password
-        "password": "pass123",
-        // Database name
-        "database": "rdmdb",
-        // Database character set
-        "charset": "utf8mb4"
+        // RealDeviceMap database information
+        "rdm": {
+            // Database IP address/FQDN
+            "host": "127.0.0.1",
+            // Database listening port
+            "port": 3306,
+            // Database account username
+            "username": "user123",
+            // Database account password
+            "password": "pass123",
+            // Database name
+            "database": "rdmdb",
+            // Database character set
+            "charset": "utf8mb4"
+        },
+        // GoFestController database information
+        "gfc": {
+            // Database IP address/FQDN
+            "host": "127.0.0.1",
+            // Database listening port
+            "port": 3306,
+            // Database account username
+            "username": "user123",
+            // Database account password
+            "password": "pass123",
+            // Database name
+            "database": "gfcdb",
+            // Database character set
+            "charset": "utf8mb4"
+        }
     },
     // Relay webhook
     "webhooks": {
