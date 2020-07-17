@@ -20,6 +20,11 @@ Backend to facilitate re-checking a Pokemon spawn with an event ticket account.
 7.) Add GoFestController endpoint to RDM webhook urls i.e. `http://gfcip:5150`  
 
 
+## Importing Accounts  
+1.) Create `.csv` file with event accounts to import i.e. `accounts.csv`  
+2.) Start account importer `npm run import -- /path/to/accounts.csv`  
+
+
 ## Configuration  
 ```js
 {
