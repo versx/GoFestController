@@ -76,7 +76,7 @@ class Pokemon {
             this.weather = data.weather;
             this.gender = data.gender;
             this.spawnId = data.spawn_id ? BigInt(data.spawn_id).toString() : null;
-            this.cellId = BigInt(data.cell_id).toString();
+            this.cellId = data.cell_id ? BigInt(data.cell_id).toString() : null;
             this.firstSeenTimestamp = data.first_seen_timestamp;
             this.expireTimestamp = data.expire_timestamp;
             this.expireTimestampVerified = data.expire_timestamp_verified;
