@@ -234,7 +234,7 @@ class Pokemon {
                 updated: key.updated,
                 changed: key.changed,
                 display_pokemon_id: key.display_pokemon_id,
-                cell_id: BigInt(key.cell_id).toString(),
+                cell_id: key.cell_id ? BigInt(key.cell_id).toString() : null,
                 capture1: key.capture_1,
                 capture2: key.capture_2,
                 capture3: key.capture_3,
