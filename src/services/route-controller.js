@@ -4,11 +4,11 @@ const POGOProtos = require('pogo-protos');
 //const POGOProtos = require('../POGOProtos.Rpc_pb.js');
 
 const config = require('../config.json');
+const { GeofenceService, Geofence } = require('./geofence.js');
 const Account = require('../models/account.js');
 const Device = require('../models/device.js');
 const Pokemon = require('../models/pokemon.js');
 const TaskFactory = require('./task-factory.js');
-const WebhookController = require('./webhook-controller.js');
 const { getCurrentTimestamp, base64_decode, sendResponse } = require('../utilities/utils.js');
 
 const levelCache = {};
@@ -376,7 +376,12 @@ class RouteController {
         if (payload.length > 0) {
             let filtered = payload.filter(x =>
                 x.type === 'pokemon' &&
-                matchesIVFilter(x.message.individual_attack, x.message.individual_defense, x.message.individual_stamina)
+                matchesIVFilter(x.message.individual_attack, x.message.individual_defense, x.message.individual_stamina) &&
+                (
+                    // No geofence names specified means no area restrictions
+                    config.geofences.length === 0 ||
+                    config.geofences.includes(GeofenceService.instance.getGeofence(x.message.latitude, x.message.longitude).name || 'Unknown')
+                )
             );
             if (filtered.length > 0) {
                 console.log('[Webhook] Filtered Pokemon Received:', filtered.length);
