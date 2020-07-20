@@ -15,7 +15,8 @@ const readFile = async (path) => {
 };
 
 const importAccounts = async (path) => {
-    let accountData = readFile(path).split('\n');
+    let data = await readFile(path);
+    let accountData = data.split('\n');
     for (let i = 0; i < accountData.length; i++) {
         let accountLine = accountData[i].split(',');
         if (accountLine.length == 2) {
