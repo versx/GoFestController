@@ -9,13 +9,14 @@ const readFile = async (path) => {
             if (err) {
                 return reject(err);
             }
-            resolve(data);
+            resolve(data.toString('utf8'));
         });
     });
 };
 
 const importAccounts = async (path) => {
     let data = await readFile(path);
+    console.log('Data:', data);
     let accountData = data.split('\n');
     for (let i = 0; i < accountData.length; i++) {
         let accountLine = accountData[i].split(',');

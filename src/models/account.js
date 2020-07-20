@@ -192,7 +192,7 @@ class Account {
         } else {
             sql = `
             INSERT INTO account (username, password, level, first_warning_timestamp, failed_timestamp, failed, last_encounter_lat, last_encounter_lon, last_encounter_time, has_ticket)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             args = [this.username, this.password, this.level, this.firstWarningTimestamp, this.failedTimestamp, this.failed, this.lastEncounterLat, this.lastEncounterLon, this.lastEncounterTime, this.hasTicket];
         }
@@ -202,7 +202,7 @@ class Account {
                 console.error('[Account] Error:', err);
                 return null;
             });
-        console.log('[Account] Save:', result)
+        //console.log('[Account] Save:', result)
     }
 }
 
