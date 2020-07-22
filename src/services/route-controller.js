@@ -381,7 +381,7 @@ class RouteController {
                     (
                         // No geofence names specified means no area restrictions
                         // or if geofence is not null and is in allowed areas
-                        config.geofences.length === 0 || geofence === null ? false : config.geofences.includes(geofence.name || 'Unknown')
+                        config.geofences.length === 0 || (geofence !== null && config.geofences.length > 0 ? config.geofences.includes(geofence.name || 'Unknown') : false)
                     )
             });
             if (filtered.length > 0) {
