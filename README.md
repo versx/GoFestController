@@ -50,7 +50,7 @@ Backend to facilitate re-checking a Pokemon spawn with an event ticket account.
         { "atk": 1, "def": 14, "sta": 14 },
         { "atk": 0, "def": 0,  "sta": 0 }
     ],
-    // Geofences to restrict re-checking incoming RDM webhooks, specify Geofence names to only check data for that area or leave blank for no area restriction
+    // Geofences to restrict re-checking incoming RDM webhooks, specify Geofence names to only check data for that area or leave empty i.e `[]` for no area restriction
     "geofences": [],
     // RealDeviceMap database
     "db": {
