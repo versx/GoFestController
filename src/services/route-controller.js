@@ -32,8 +32,8 @@ class RouteController {
             return res.sendStatus(400);
         }
         //let username = payload['username'];
-        let minLevel = config.minLevel || 35;//parseInt(payload['min_level'] || 0);
-        let maxLevel = config.maxLevel || 40;//parseInt(payload['max_level'] || 29);
+        let minLevel = config.minLevel || 35;
+        let maxLevel = config.maxLevel || 40;
         let device = await Device.getById(uuid);
 
         console.log('[Controller]', uuid, 'received control request:', type);
@@ -362,7 +362,7 @@ class RouteController {
             console.log('[Raw] Found:', wildPokemon.length, 'wild Pokemon,', nearbyPokemon.length, 'nearby Pokemon, and', encounters.length, 'encounters at', latTarget, lonTarget);
         }
     
-        setImmediate(async () => { await RouteController.handleConsumables(wildPokemon, nearbyPokemon, encounters, username); });
+        setImmediate(async () => { await RouteController.handleConsumables(encounters, username); });
         sendResponse(res, 'ok', null);
     }
 
@@ -374,15 +374,16 @@ class RouteController {
     async handleWebhookData(req, res) {
         let payload = req.body;
         if (payload.length > 0) {
-            let filtered = payload.filter(x =>
-                x.type === 'pokemon' &&
-                matchesIVFilter(x.message.individual_attack, x.message.individual_defense, x.message.individual_stamina) &&
-                (
-                    // No geofence names specified means no area restrictions
-                    config.geofences.length === 0 ||
-                    config.geofences.includes(GeofenceService.instance.getGeofence(x.message.latitude, x.message.longitude).name || 'Unknown')
-                )
-            );
+            let filtered = payload.filter(x => {
+                let geofence = GeofenceService.instance.getGeofence(x.message.latitude, x.message.longitude);
+                return x.type === 'pokemon' &&
+                    matchesIVFilter(x.message.individual_attack, x.message.individual_defense, x.message.individual_stamina) &&
+                    (
+                        // No geofence names specified means no area restrictions
+                        // or if geofence is not null and is in allowed areas
+                        config.geofences.length === 0 || geofence === null ? false : config.geofences.includes(geofence.name || 'Unknown')
+                    )
+            });
             if (filtered.length > 0) {
                 console.log('[Webhook] Filtered Pokemon Received:', filtered.length);
                 for (let i = 0; i < filtered.length; i++) {
@@ -445,23 +446,7 @@ class RouteController {
         res.send(html);
     }
 
-    static async handleConsumables(wildPokemon, nearbyPokemon, encounters, username) {
-        if (wildPokemon.length > 0) {
-            for (let i = 0; i < wildPokemon.length; i++) {
-                const wild = wildPokemon[i];
-                //const pkmn = new Pokemon({ wild: wild.data });
-                //await pkmn.save(false);
-                //WebhookController.instance.addPokemonEvent(pkmn);
-            }
-        }
-        if (nearbyPokemon.length > 0) {
-            for (let i = 0; i < nearbyPokemon.length; i++) {
-                const nearby = nearbyPokemon[i];
-                //const pkmn = new Pokemon({ nearby: nearby });
-                //await pkmn.save(false);
-                //WebhookController.instance.addPokemonEvent(pkmn);
-            }
-        }
+    static async handleConsumables(encounters, username) {
         if (encounters.length > 0) {
             //console.log('[Raw] Encounters:', encounters);
             // We only really care about encounters
