@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS `pokestop` (
     CONSTRAINT `fk_pokestop_cell_id` FOREIGN KEY (`cell_id`) REFERENCES `s2cell` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE `gym` (
+CREATE TABLE IF NOT EXISTS `gym` (
    `id` varchar(35) NOT NULL,
    `lat` double(18,14) NOT NULL,
    `lon` double(18,14) NOT NULL,
@@ -170,7 +170,7 @@ CREATE TABLE `gym` (
    CONSTRAINT `fk_gym_cell_id` FOREIGN KEY (`cell_id`) REFERENCES `s2cell` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE `weather` (
+CREATE TABLE IF NOT EXISTS `weather` (
    `id` bigint(30) NOT NULL,
    `level` tinyint(2) unsigned DEFAULT NULL,
    `latitude` double(18,14) NOT NULL DEFAULT 0.00000000000000,
