@@ -70,7 +70,8 @@ class WebhookController {
             .then(x => console.log('[WebhookController] Webhook event with', events.length, 'payloads sent to', url))
             .catch(err => {
                 if (err) {
-                    console.error('[WebhookController] Error:', err);
+                    console.error('[WebhookController] Error occurred, trying again:', err);
+                    this.sendEvents(events, url);
                     return;
                 }
             });
