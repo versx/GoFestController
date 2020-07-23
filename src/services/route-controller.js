@@ -267,14 +267,8 @@ class RouteController {
                 console.error('[Raw] Error:', err);
             }
         }
-    
-        let wildPokemon = [];
-        let nearbyPokemon = [];
+
         let encounters = [];
-    
-        let isEmptyGMO = true;
-        let isInvalidGMO = true;
-        let containsGMO = false;
         let isMadData = false;
     
         for (let i = 0; i < contents.length; i++) {
@@ -299,6 +293,7 @@ class RouteController {
                 case 4: // GetHoloInventoryResponse
                 case 101: // FortSearchResponse
                 case 104: // FortDetailsResponse
+                case 106: // GetMapObjectsResponse
                 case 156: // GymGetInfoResponse
                     break;
                 case 102: // EncounterResponse
@@ -315,51 +310,14 @@ class RouteController {
                         }
                     }
                     break;
-                case 106: // GetMapObjectsResponse
-                    containsGMO = true;
-                    try {
-                        let gmo = POGOProtos.Networking.Responses.GetMapObjectsResponse.decode(base64_decode(data));
-                        if (gmo) {
-                            isInvalidGMO = false;
-                            if (gmo.map_cells.length === 0) {
-                                //console.debug('[Raw] Map cells is empty');
-                                return res.sendStatus(400);
-                            }
-                            gmo.map_cells.forEach((mapCell) => {
-                                let timestamp = mapCell.current_timestamp_ms;
-                                let wildNew = mapCell.wild_pokemons;
-                                wildNew.forEach((wild) => {
-                                    wildPokemon.push({
-                                        cell: mapCell.s2_cell_id,
-                                        data: wild,
-                                        timestamp_ms: timestamp,
-                                        username: username
-                                    });
-                                });
-                                let nearbyNew = mapCell.nearby_pokemons;
-                                nearbyNew.forEach((nearby) => {
-                                    nearbyPokemon.push({
-                                        cell: mapCell.s2_cell_id,
-                                        data: nearby,
-                                        username: username
-                                    });
-                                });
-                            });
-                        } else {
-                            console.error('[Raw] Malformed GetMapObjectsResponse');
-                        }
-                    } catch (err) {
-                        console.error('[Raw] Unable to decode GetMapObjectsResponse:', err);
-                    }
-                    break;
                 default:
                     console.error('[Raw] Invalid method provided:', method);
                     return;
             }
         }
     
-        if (wildPokemon.length > 0 || nearbyPokemon.length > 0 || encounters.length > 0) {
-            console.log('[Raw] Found:', wildPokemon.length, 'wild Pokemon,', nearbyPokemon.length, 'nearby Pokemon, and', encounters.length, 'encounters at', latTarget, lonTarget);
+        if (encounters.length > 0) {
+            console.log('[Raw] Found:', encounters.length, 'Pokemon encounters at', latTarget, lonTarget);
         }
     
         setImmediate(async () => { await RouteController.handleConsumables(encounters, username); });

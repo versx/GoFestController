@@ -266,9 +266,9 @@ class Pokemon {
         this.form = encounter.wild_pokemon.pokemon_data.pokemon_display.form;
         this.gender = encounter.wild_pokemon.pokemon_data.pokemon_display.gender;
         if (encounter.capture_probability) {
-            this.capture1 = parseFloat(encounter.capture_probability.capture_probability[0])
-            this.capture2 = parseFloat(encounter.capture_probability.capture_probability[1])
-            this.capture3 = parseFloat(encounter.capture_probability.capture_probability[2])
+            this.capture1 = parseFloat(encounter.capture_probability.capture_probability[0]);
+            this.capture2 = parseFloat(encounter.capture_probability.capture_probability[1]);
+            this.capture3 = parseFloat(encounter.capture_probability.capture_probability[2]);
         }
         let cpMultiplier = encounter.wild_pokemon.pokemon_data.cp_multiplier;
         let level;
@@ -277,7 +277,7 @@ class Pokemon {
         } else {
             level = Math.round(171.0112688 * cpMultiplier - 95.20425243);
         }
-        this.level = level
+        this.level = level;
         this.isDitto = Pokemon.isDittoDisguised(this.pokemonId,
                                                 this.level || 0,
                                                 this.weather || 0,
@@ -291,7 +291,7 @@ class Pokemon {
         }
 
         if (this.spawnId === undefined) {
-            this.spawnId = BigInt(parseInt(encounter.wild_pokemon.spawn_point_id, 16)).toString();//parseInt(encounter.wild_pokemon.spawn_point_id, 16).toString();
+            this.spawnId = BigInt(parseInt(encounter.wild_pokemon.spawn_point_id, 16)).toString();
             this.lat = encounter.wild_pokemon.latitude;
             this.lon = encounter.wild_pokemon.longitude;
 
