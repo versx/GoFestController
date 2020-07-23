@@ -88,7 +88,7 @@ class WebhookController {
             }
         };
         request(options, (err, res, body) => {
-            if (err) { //throw err;
+            if (err) {
                 console.error('[WebhookController] Error:', err);
                 return;
             }

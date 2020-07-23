@@ -129,6 +129,66 @@ CREATE TABLE IF NOT EXISTS `pokestop` (
     CONSTRAINT `fk_pokestop_cell_id` FOREIGN KEY (`cell_id`) REFERENCES `s2cell` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE `gym` (
+   `id` varchar(35) NOT NULL,
+   `lat` double(18,14) NOT NULL,
+   `lon` double(18,14) NOT NULL,
+   `name` varchar(128) DEFAULT NULL,
+   `url` varchar(200) DEFAULT NULL,
+   `last_modified_timestamp` int(11) unsigned DEFAULT NULL,
+   `raid_end_timestamp` int(11) unsigned DEFAULT NULL,
+   `raid_spawn_timestamp` int(11) unsigned DEFAULT NULL,
+   `raid_battle_timestamp` int(11) unsigned DEFAULT NULL,
+   `updated` int(11) unsigned NOT NULL,
+   `raid_pokemon_id` smallint(6) unsigned DEFAULT NULL,
+   `guarding_pokemon_id` smallint(6) unsigned DEFAULT NULL,
+   `availble_slots` smallint(6) unsigned DEFAULT NULL,
+   `team_id` tinyint(3) unsigned DEFAULT NULL,
+   `raid_level` tinyint(3) unsigned DEFAULT NULL,
+   `enabled` tinyint(1) unsigned DEFAULT NULL,
+   `ex_raid_eligible` tinyint(1) unsigned DEFAULT NULL,
+   `in_battle` tinyint(1) unsigned DEFAULT NULL,
+   `raid_pokemon_move_1` smallint(6) unsigned DEFAULT NULL,
+   `raid_pokemon_move_2` smallint(6) unsigned DEFAULT NULL,
+   `raid_pokemon_form` mediumint(5) unsigned DEFAULT NULL,
+   `raid_pokemon_cp` mediumint(5) unsigned DEFAULT NULL,
+   `raid_is_exclusive` tinyint(1) unsigned DEFAULT NULL,
+   `cell_id` bigint(20) unsigned DEFAULT NULL,
+   `deleted` tinyint(1) unsigned NOT NULL DEFAULT 0,
+   `total_cp` int(11) DEFAULT NULL,
+   `first_seen_timestamp` int(11) unsigned NOT NULL,
+   `raid_pokemon_gender` tinyint(3) unsigned DEFAULT NULL,
+   `sponsor_id` smallint(5) unsigned DEFAULT NULL,
+   `raid_pokemon_costume` smallint(4) unsigned DEFAULT NULL,
+   PRIMARY KEY (`id`),
+   KEY `ix_coords` (`lat`,`lon`),
+   KEY `ix_raid_end_timestamp` (`raid_end_timestamp`),
+   KEY `ix_updated` (`updated`),
+   KEY `ix_raid_pokemon_id` (`raid_pokemon_id`),
+   KEY `fk_gym_cell_id` (`cell_id`),
+   KEY `ix_gym_deleted` (`deleted`),
+   CONSTRAINT `fk_gym_cell_id` FOREIGN KEY (`cell_id`) REFERENCES `s2cell` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE `weather` (
+   `id` bigint(30) NOT NULL,
+   `level` tinyint(2) unsigned DEFAULT NULL,
+   `latitude` double(18,14) NOT NULL DEFAULT 0.00000000000000,
+   `longitude` double(18,14) NOT NULL DEFAULT 0.00000000000000,
+   `gameplay_condition` tinyint(3) unsigned DEFAULT NULL,
+   `wind_direction` mediumint(8) DEFAULT NULL,
+   `cloud_level` tinyint(3) unsigned DEFAULT NULL,
+   `rain_level` tinyint(3) unsigned DEFAULT NULL,
+   `wind_level` tinyint(3) unsigned DEFAULT NULL,
+   `snow_level` tinyint(3) unsigned DEFAULT NULL,
+   `fog_level` tinyint(3) unsigned DEFAULT NULL,
+   `special_effect_level` tinyint(3) unsigned DEFAULT NULL,
+   `severity` tinyint(3) unsigned DEFAULT NULL,
+   `warn_weather` tinyint(3) unsigned DEFAULT NULL,
+   `updated` int(11) unsigned NOT NULL,
+   PRIMARY KEY (`id`)
+);
+
 CREATE TABLE IF NOT EXISTS `s2cell` (
     `id` bigint(20) unsigned NOT NULL,
     `level` tinyint(3) unsigned DEFAULT NULL,
