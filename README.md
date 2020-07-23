@@ -108,7 +108,7 @@ If you'd like to use the same/one database for everything, change the database s
 |---|---|---|
 | GET | `/` | Incoming RDM webhooks endpoint |
 | GET \| POST | `/raw` | Incoming GFC raw data endpoint |
-| GET \| POST | `/controler` | Support for typflo controller endpoint |
-| GET \| POST | `/controller` | Support for controller endpoint |
+| GET \| POST | `/controler` | Support for typflo controller endpoint to control devices |
+| GET \| POST | `/controller` | Support for controller endpoint to control devices |
 | GET | `/tasks` | Table of queued tasks |
 | POST | `/test` | Test endpoint for GFC webhook relay |
