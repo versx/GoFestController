@@ -5,7 +5,7 @@ Backend to facilitate re-checking a Pokemon spawn with an event ticket account.
 
 ## Prerequisites  
 - [NodeJS v12.0](https://nodejs.org/en/download/)  
-- [RealDeviceMap](https://github.com/realdevicemap/realdevicemap) instance  
+- [RealDeviceMap](https://github.com/realdevicemap/realdevicemap) installation  
 - New database for GoFestController (i.e. gfc, gfcdb, etc..)  
 - Run the `schema.sql` migration file against your new GoFestController database  
 
@@ -23,6 +23,10 @@ Backend to facilitate re-checking a Pokemon spawn with an event ticket account.
 ## Importing Accounts  
 1.) Create `.csv` file with event accounts to import i.e. `accounts.csv` (Format: `username,password`)  
 2.) Start account importer `npm run import -- /path/to/accounts.csv`  
+
+
+## Notes  
+If you'd like to use the same/one database for everything, change the database sections in the config.json to match the same info.  
 
 
 ## Configuration  
