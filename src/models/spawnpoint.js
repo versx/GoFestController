@@ -20,7 +20,7 @@ class Spawnpoint {
      * @param data 
      */
     constructor(id, lat, lon, despawnSecond, updated) {
-        this.id = BigInt(id).toString();//parseInt(data.id.toString(), 16).toString();
+        this.id = BigInt(id).toString();
         this.lat = lat;
         this.lon = lon;
         this.despawnSecond = despawnSecond;
@@ -117,7 +117,7 @@ class Spawnpoint {
         return {
             type: 'spawnpoint',
             message: {
-                id: parseInt(this.id, 16),//.toString(16),
+                id: parseInt(this.id, 16),
                 lat: this.lat,
                 lon: this.lon,
                 updated: this.updated || 1,

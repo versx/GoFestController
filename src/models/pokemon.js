@@ -525,7 +525,7 @@ class Pokemon {
         }
         if (this.spawnId) {
             let spawnpoint;
-            if (this.expireTimestampVerified && this.expireTimestamp) {
+            if (this.expireTimestampVerified && this.expireTimestamp > 0) {
                 let date = moment(this.expireTimestamp).format('mm:ss');
                 let split = date.split(':');
                 let minute = parseInt(split[0]);
@@ -576,8 +576,7 @@ class Pokemon {
     getDespawnTimer(spawnpoint, timestampMs) {
         let despawnSecond = spawnpoint.despawnSecond;
         if (despawnSecond) {
-            let ts = timestampMs.toString();
-            let date = moment((parseInt(ts) / 1000));
+            let date = moment(timestampMs / 1000);
             let dateFormat = date.format('mm:ss');
             let dateUnix = date.format('x');
             let split = dateFormat.split(':');
