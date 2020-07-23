@@ -5,7 +5,7 @@ Backend to facilitate re-checking a Pokemon spawn with an event ticket account.
 
 ## Prerequisites  
 - [NodeJS v12.0](https://nodejs.org/en/download/)  
-- [RealDeviceMap](https://github.com/realdevicemap/realdevicemap) instance  
+- [RealDeviceMap](https://github.com/realdevicemap/realdevicemap) installation  
 - New database for GoFestController (i.e. gfc, gfcdb, etc..)  
 - Run the `schema.sql` migration file against your new GoFestController database  
 
