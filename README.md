@@ -25,6 +25,10 @@ Backend to facilitate re-checking a Pokemon spawn with an event ticket account.
 2.) Start account importer `npm run import -- /path/to/accounts.csv`  
 
 
+## Notes  
+If you'd like to use the same/one database for everything, change the database sections in the config.json to match the same info.  
+
+
 ## Configuration  
 ```js
 {
