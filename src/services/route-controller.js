@@ -373,6 +373,10 @@ class RouteController {
      */
     async handleWebhookData(req, res) {
         let payload = req.body;
+        // Fix for mapjs scout, can't send as an array for some reason
+        if (payload.length === undefined) {
+            payload = [payload];
+        }
         if (payload.length > 0) {
             let filtered = payload.filter(x => {
                 let geofence = GeofenceService.instance.getGeofence(x.message.latitude, x.message.longitude);
@@ -422,7 +426,9 @@ class RouteController {
         }
         </style>
         <table style='width:100%'>
+          <caption><h2><b>Available Tasks: ${tasks.length}</b></h2></caption>
           <tr style='background: rgb(33, 37, 41); color: white;'>
+            <th>#</th>
             <th>Encounter</th>
             <th>Pokemon</th>
             <th>Form</th>
@@ -434,6 +440,7 @@ class RouteController {
             let task = tasks[i];
             html += `
             <tr>
+              <td>${i + 1}</td>
               <td>${task.encounter_id}</td>
               <td>${task.pokemon_id}</td>
               <td>${task.form}</td>
@@ -471,9 +478,12 @@ class RouteController {
 const matchesIVFilter = (atk, def, sta) => {
     let filters = config.filters;
     let result = false;
+    let atkIV = parseInt(atk);
+    let defIV = parseInt(def);
+    let staIV = parseInt(sta);
     for (let i = 0; i < filters.length; i++) {
         let filter = filters[i];
-        if (filter.atk === atk && filter.def === def && filter.sta === sta) {
+        if (filter.atk === atkIV && filter.def === defIV && filter.sta === staIV) {
             result = true;
             break;
         }

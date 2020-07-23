@@ -3,6 +3,7 @@
 // TODO: Redis caching for incoming webhooks for pvp data if needed?
 // TODO: Priority per IV
 // TODO: Check if wild/nearby is ultra rare Pokemon and save to database then queue for IV check
+// TODO: Check expire tth when pulling task
 
 const express = require('express');
 const app = express();
@@ -25,6 +26,12 @@ app.use(helmet());
 // Body parser middlewares
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+});
 
 // Routes
 app.get(['/controler', '/controller'], router.handleControllerData);
