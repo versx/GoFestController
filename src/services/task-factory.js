@@ -56,7 +56,7 @@ class TaskFactory {
     }
 
     /**
-     * 
+     * Clear expired tasks
      */
     clearExpired() {
         for (let i = 0; i < TaskFactory.ivCache.length; i++) {

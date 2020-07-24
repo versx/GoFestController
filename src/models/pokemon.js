@@ -4,11 +4,10 @@ const moment = require('moment');
 
 const config = require('../config.json');
 const Cell = require('./cell.js');
-const Pokestop = require('./pokestop.js');
 const Spawnpoint = require('./spawnpoint.js');
+const MySQLConnector = require('../services/mysql.js');
 const TaskFactory = require('../services/task-factory.js');
 const WebhookController = require('../services/webhook-controller.js');
-const MySQLConnector = require('../services/mysql.js');
 const { getCurrentTimestamp, generateEncounterId } = require('../utilities/utils.js');
 
 const db = new MySQLConnector(config.db.rdm);
@@ -20,6 +19,8 @@ class Pokemon {
     static PokemonTimeUnseen = 1200;
     static PokemonTimeReseen = 600;
     static DittoDisguises = [46,163,165,167,187,223,293,316,322,399,590];
+    static DittoMove1Transform = 242;
+    static DittoMove2Struggle = 133;
 
     id;
     lat;
@@ -61,120 +62,39 @@ class Pokemon {
      * @param data 
      */
     constructor(data) {
-        if (data.wild) {
-            this.initWild(data);
-        } else if (data.nearby) {
-            this.initNearby(data);
-        } else {
-            this.id = BigInt(data.id).toString();
-            this.lat = data.lat;
-            this.lon = data.lon;
-            this.pokemonId = data.pokemon_id;
-            this.form = data.form;
-            this.level = data.level;
-            this.costume = data.costume;
-            this.weather = data.weather;
-            this.gender = data.gender;
-            this.spawnId = data.spawn_id ? BigInt(data.spawn_id).toString() : null;
-            this.cellId = data.cell_id ? BigInt(data.cell_id).toString() : null;
-            this.firstSeenTimestamp = data.first_seen_timestamp;
-            this.expireTimestamp = data.expire_timestamp;
-            this.expireTimestampVerified = data.expire_timestamp_verified;
-            this.cp = data.cp;
-            this.move1 = data.move_1;
-            this.move2 = data.move_2;
-            this.size = data.size; // REVIEW: height
-            this.weight = data.weight;
-            this.atkIv = data.atk_iv;
-            this.defIv = data.def_iv;
-            this.staIv = data.sta_iv;
-            this.username = data.username;
-            this.shiny = data.shiny;
-            this.updated = data.updated;
-            this.changed = data.changed;
-            this.pokestopId = data.pokestop_id;
-            this.displayPokemonId = data.display_pokemon_id;
-            this.capture1 = data.capture_1;
-            this.capture2 = data.capture_2;
-            this.capture3 = data.capture_3;
-            this.pvpRankingsGreatLeague = data.pvp_rankings_great_league;
-            this.pvpRankingsUltraLeague = data.pvp_rankings_ultra_league;
-        }
-    }
-
-    async initWild(data) {
-        this.id = data.wild.encounter_id.toString();
-        //console.log('Wild Pokemon Data:', data.wild.pokemon_data);
-        this.pokemonId = data.wild.pokemon_data.pokemon_id;
-        if (data.wild.latitude === undefined || data.wild.latitude === null) {
-            console.debug('[Pokemon] Wild Pokemon null lat/lon!');
-        }
-        this.lat = data.wild.latitude;
-        this.lon = data.wild.longitude;
-        let spawnId = BigInt(parseInt(data.wild.spawn_point_id, 16)).toString();
-        this.gender = data.wild.pokemon_data.pokemon_display.gender;
-        this.form = data.wild.pokemon_data.pokemon_display.form;
-        if (data.wild.pokemon_data.pokemon_display) {
-            this.costume = data.wild.pokemon_data.pokemon_display.costume;
-            this.weather = data.wild.pokemon_data.pokemon_display.weather_boosted_condition;
-        }
-        this.username = data.wild.username;
-        let currentTimestamp = getCurrentTimestamp() * 1000;
-        if (data.wild.time_till_hidden_ms > 0 && data.wild.time_till_hidden_ms <= 90000) {
-            this.expireTimestamp = Math.round(currentTimestamp / 1000 + data.wild.time_till_hidden_ms);
-            this.expireTimestampVerified = true;
-        } else {
-            this.expireTimestampVerified = false;
-        }
-        if (!this.expireTimestampVerified && spawnId) {
-            // Spawnpoint not verified, check if we have the tth.
-            let spawnpoint = {};
-            try {
-                spawnpoint = await Spawnpoint.getById(spawnId);
-            } catch (err) {
-                spawnpoint = null;
-            }
-            if (spawnpoint instanceof Spawnpoint) {
-                let expireTimestamp = this.getDespawnTimer(spawnpoint, currentTimestamp);
-                if (expireTimestamp > 0) {
-                    this.expireTimestamp = expireTimestamp;
-                    this.expireTimestampVerified = true;
-                }
-            }
-        }
-        this.spawnId = spawnId;
-        if (data.wild.cell === undefined || data.wild.cell === null) {
-            data.wild.cell = Cell.getCellIdFromLatLon(this.lat, this.lon);
-        } else {
-            this.cellId = BigInt(data.wild.cell).toString();
-        }
-    }
-
-    async initNearby(data) {
-        this.id = String(data.nearby.data.encounter_id);
-        this.pokemonId = data.nearby.data.pokemon_id;
-        this.pokestopId = data.nearby.data.fort_id;
-        this.gender = data.nearby.data.pokemon_display.gender;
-        this.form = data.nearby.data.pokemon_display.form;
-        if (data.nearby.data.pokemon_display) {
-            this.costume = data.nearby.data.pokemon_display.costume;
-            this.weather = data.nearby.data.pokemon_display.weather_boosted_condition;
-        }
-        this.username = data.nearby.username;
-        let pokestop;
-        try {
-            pokestop = await Pokestop.getById(data.nearby.data.fort_id);
-        } catch (err) {
-            pokestop = null;
-            console.error('[Pokemon] InitNearby Error:', err);
-        }
-        if (pokestop) {
-            this.pokestopId = pokestop.id;
-            this.lat = pokestop.lat;
-            this.lon = pokestop.lon;
-        }
-        this.cellId = BigInt(data.nearby.cell).toString();
-        this.expireTimestampVerified = false;
+        this.id = BigInt(data.id).toString();
+        this.lat = data.lat;
+        this.lon = data.lon;
+        this.pokemonId = data.pokemon_id;
+        this.form = data.form;
+        this.level = data.level;
+        this.costume = data.costume;
+        this.weather = data.weather;
+        this.gender = data.gender;
+        this.spawnId = data.spawn_id ? BigInt(data.spawn_id).toString() : null;
+        this.cellId = data.cell_id ? BigInt(data.cell_id).toString() : null;
+        this.firstSeenTimestamp = data.first_seen_timestamp;
+        this.expireTimestamp = data.expire_timestamp;
+        this.expireTimestampVerified = data.expire_timestamp_verified;
+        this.cp = data.cp;
+        this.move1 = data.move_1;
+        this.move2 = data.move_2;
+        this.size = data.size; // REVIEW: height
+        this.weight = data.weight;
+        this.atkIv = data.atk_iv;
+        this.defIv = data.def_iv;
+        this.staIv = data.sta_iv;
+        this.username = data.username;
+        this.shiny = data.shiny;
+        this.updated = data.updated;
+        this.changed = data.changed;
+        this.pokestopId = data.pokestop_id;
+        this.displayPokemonId = data.display_pokemon_id;
+        this.capture1 = data.capture_1;
+        this.capture2 = data.capture_2;
+        this.capture3 = data.capture_3;
+        this.pvpRankingsGreatLeague = data.pvp_rankings_great_league;
+        this.pvpRankingsUltraLeague = data.pvp_rankings_ultra_league;
     }
 
     /**
@@ -321,13 +241,11 @@ class Pokemon {
      * @param displayPokemonId 
      */
     setDittoAttributes(displayPokemonId) {
-        let moveTransformFast = 242;
-        let moveStruggle = 133;
         this.displayPokemonId = displayPokemonId;
         this.pokemonId = Pokemon.DittoPokemonId;
         this.form = 0;
-        this.move1 = moveTransformFast;
-        this.move2 = moveStruggle;
+        this.move1 = Pokemon.DittoMove1Transform;
+        this.move2 = Pokemon.DittoMove2Struggle;
         this.gender = 3;
         this.costume = 0;
         this.size = 0;
