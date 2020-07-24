@@ -111,28 +111,31 @@ class RouteController {
                 break;
             case 'get_account':
                 let account = await Account.getNewAccount(minLevel, maxLevel, true);
-                console.log('[Controller] GetAccount:', account);
+                console.log('[Controller] GetNewAccount:', account);
                 if (device === undefined || device === null || 
                     account === undefined || account === null) {
-                    console.error('[Controller] Failed to get event account, device or account is null.');
-                    return res.sendStatus(400);
-                }
-                if (device.accountUsername) {
-                    let oldAccount = await Account.getWithUsername(device.accountUsername, true);
-                    if (oldAccount instanceof Account && 
-                        oldAccount.hasTicket &&
-                        oldAccount.level >= minLevel &&
-                        oldAccount.level <= maxLevel &&
-                        oldAccount.firstWarningTimestamp === undefined && 
-                        oldAccount.failed                === undefined && 
-                        oldAccount.failedTimestamp       === undefined) {
-                        sendResponse(res, 'ok', {
-                            username: oldAccount.username.trim(),
-                            password: oldAccount.password.trim(),
-                            first_warning_timestamp: oldAccount.firstWarningTimestamp,
-                            level: oldAccount.level
-                        });
-                        return;
+                    if (device.accountUsername) {
+                        account = await Account.getWithUsername(device.accountUsername, true);
+                        console.log('[Controller] GetOldAccount:', account);
+                        if (account instanceof Account && 
+                            account.hasTicket &&
+                            account.level >= minLevel &&
+                            account.level <= maxLevel &&
+                            account.firstWarningTimestamp === undefined && 
+                            account.failed                === undefined && 
+                            account.failedTimestamp       === undefined) {
+                            sendResponse(res, 'ok', {
+                                username: oldAccount.username.trim(),
+                                password: oldAccount.password.trim(),
+                                first_warning_timestamp: oldAccount.firstWarningTimestamp,
+                                level: oldAccount.level
+                            });
+                            return;
+                        }
+                    }
+                    else{
+                        console.error('[Controller] Failed to get event account, device or account is null.');
+                        return res.sendStatus(400);
                     }
                 }
 
