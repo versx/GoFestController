@@ -391,6 +391,7 @@ class RouteController {
             <th>Pokemon</th>
             <th>Form</th>
             <th>Stats</th>
+            <th>Expires</th>
             <th>Location</th>
           </tr>
         `;
@@ -403,6 +404,7 @@ class RouteController {
               <td>${task.pokemon_id}</td>
               <td>${task.form}</td>
               <td>${task.individual_attack}/${task.individual_defense}/${task.individual_stamina}</td>
+              <td>${new Date(task.disappear_time * 1000).toLocaleString()}</td>
               <td>${task.latitude}, ${task.longitude}</td>
             </tr>
             `;
