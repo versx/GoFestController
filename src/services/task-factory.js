@@ -14,6 +14,8 @@ class TaskFactory {
     minLevel;
     maxLevel;
 
+    expireDelay = 15;
+
     /**
      * Instantiate a new TaskFactory object
      */
@@ -21,6 +23,7 @@ class TaskFactory {
         this.instanceName = instanceName;
         this.minLevel = minLevel;
         this.maxLevel = maxLevel;
+        this.timer = setInterval(() => this.clearExpired(), this.expireDelay * 1000);
     }
 
     /**
@@ -50,6 +53,21 @@ class TaskFactory {
      */
     getAll() {
         return TaskFactory.ivCache;
+    }
+
+    /**
+     * 
+     */
+    clearExpired() {
+        for (let i = 0; i < TaskFactory.ivCache.length; i++) {
+            let expires = TaskFactory.ivCache[i].disappear_time;
+            let now = Math.round(new Date().getTime() / 1000);
+            if (now > expires) {
+                // Remove item at index of cache
+                console.log('[TaskFactory] Removing stale item from ivCache at index', i + '/' + TaskFactory.ivCache.length, 'expiration time was', new Date(expires * 1000).toLocaleString());
+                TaskFactory.ivCache.splice(i, 1);
+            }
+        }
     }
 
     /**
