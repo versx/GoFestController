@@ -14,6 +14,7 @@ class TaskFactory {
     minLevel;
     maxLevel;
 
+    routeCount = 0;
     expireDelay = 15;
 
     /**
@@ -82,6 +83,26 @@ class TaskFactory {
         // Grab a task from the top of the queue
         let pokemon = this.dequeue();
         if (pokemon === undefined || pokemon === null) {
+            if(config.route.length !== 0){
+                console.log('[TaskFactory] No pending tasks sending to route config at postion:', this.routeCount);
+                let route = config.route
+                let currentCount = this.routeCount
+                if(this.routeCount > route.length){
+                    this.routeCount = 0;
+                    currentCount = 0;
+                }
+                else{
+                    this.routeCount = this.routeCount + 1;
+                }
+                return {
+                    'area': this.instanceName,
+                    'action': 'scan_pokemon',
+                    'lat': route[currentCount][0],
+                    'lon': route[currentCount][1],
+                    'min_level': this.minLevel,
+                    'max_level': this.maxLevel
+                };
+            }            
             return null;
         }
         // Cache the pvp stats to grab later when sending
