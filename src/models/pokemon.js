@@ -120,9 +120,9 @@ class Pokemon {
             this.weather = data.wild.pokemon_data.pokemon_display.weather_boosted_condition;
         }
         this.username = data.wild.username;
-        let currentTimestamp = getCurrentTimestamp() * 1000;
+        let currentTimestamp = getCurrentTimestamp();
         if (data.wild.time_till_hidden_ms > 0 && data.wild.time_till_hidden_ms <= 90000) {
-            this.expireTimestamp = Math.round(currentTimestamp / 1000 + data.wild.time_till_hidden_ms);
+            this.expireTimestamp = Math.round(currentTimestamp + data.wild.time_till_hidden_ms);
             this.expireTimestampVerified = true;
         } else {
             this.expireTimestampVerified = false;
@@ -136,7 +136,7 @@ class Pokemon {
                 spawnpoint = null;
             }
             if (spawnpoint instanceof Spawnpoint) {
-                let expireTimestamp = this.getDespawnTimer(spawnpoint, currentTimestamp);
+                let expireTimestamp = this.getDespawnTimer(spawnpoint);
                 if (expireTimestamp > 0) {
                     this.expireTimestamp = expireTimestamp;
                     this.expireTimestampVerified = true;
@@ -304,7 +304,7 @@ class Pokemon {
                     spawnpoint = null;
                 }
                 if (spawnpoint instanceof Spawnpoint) {
-                    let expireTimestamp = this.getDespawnTimer(spawnpoint, getCurrentTimestamp() * 1000);
+                    let expireTimestamp = this.getDespawnTimer(spawnpoint);
                     if (expireTimestamp > 0) {
                         this.expireTimestamp = expireTimestamp;
                         this.expireTimestampVerified = true;
@@ -575,12 +575,11 @@ class Pokemon {
     getDespawnTimer(spawnpoint, timestampMs) {
         let despawnSecond = spawnpoint.despawnSecond;
         if (despawnSecond) {
-            let date = moment(timestampMs / 1000);
-            let dateFormat = date.format('mm:ss');
-            let dateUnix = date.format('x');
-            let split = dateFormat.split(':');
-            let minute = parseInt(split[0]);
-            let second = parseInt(split[1]);
+            let currentDate = new Date();
+            let currentTime = Math.floor(currentDate / 1000);
+            let ts = currentTime.toString();
+            let minute = currentDate.getMinutes();
+            let second = currentDate.getSeconds();
             let secondOfHour = second + minute * 60;
 
             let despawnOffset;
@@ -589,7 +588,7 @@ class Pokemon {
             } else {
                 despawnOffset = despawnSecond - secondOfHour;
             }
-            let despawn = parseInt(dateUnix) + despawnOffset;
+            let despawn = parseInt(ts) + despawnOffset;
             return despawn;
         }
     }
