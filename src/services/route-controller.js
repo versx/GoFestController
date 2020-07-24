@@ -411,6 +411,11 @@ class RouteController {
         res.send(html);
     }
 
+    /**
+     * Handle consumable items
+     * @param {*} encounters 
+     * @param {*} username 
+     */
     static async handleConsumables(encounters, username) {
         if (encounters.length > 0) {
             //console.log('[Raw] Encounters:', encounters);
