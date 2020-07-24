@@ -109,22 +109,6 @@ class Spawnpoint {
                 console.error('[Spawnpoint] Error:', err);
         });     
     }
-
-    /**
-     * Get Spawnpoint as JSON message for webhook payload
-     */
-    toJson() {
-        return {
-            type: 'spawnpoint',
-            message: {
-                id: parseInt(this.id, 16),
-                lat: this.lat,
-                lon: this.lon,
-                updated: this.updated || 1,
-                despawn_second: this.despawnSecond
-            }
-        };
-    }
 }
 
 module.exports = Spawnpoint;
