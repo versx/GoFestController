@@ -83,15 +83,14 @@ class TaskFactory {
         // Grab a task from the top of the queue
         let pokemon = this.dequeue();
         if (pokemon === undefined || pokemon === null) {
-            if(config.route.length !== 0){
+            if (config.route.length !== 0) {
                 console.log('[TaskFactory] No pending tasks sending to route config at postion:', this.routeCount);
-                let route = config.route
-                let currentCount = this.routeCount
-                if(this.routeCount > route.length){
+                let route = config.route;
+                let currentCount = this.routeCount;
+                if (this.routeCount > route.length) {
                     this.routeCount = 0;
                     currentCount = 0;
-                }
-                else{
+                } else {
                     this.routeCount = this.routeCount + 1;
                 }
                 return {
