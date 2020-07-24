@@ -132,8 +132,7 @@ class RouteController {
                             });
                             return;
                         }
-                    }
-                    else{
+                    } else {
                         console.error('[Controller] Failed to get event account, device or account is null.');
                         return res.sendStatus(400);
                     }
