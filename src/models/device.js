@@ -37,39 +37,6 @@ class Device {
     }
 
     /**
-     * Get all devices.
-     */
-    static async getAll() {
-        let sql = `
-        SELECT uuid, instance_name, account_username, last_host, last_seen, last_lat, last_lon
-        FROM device
-        `;
-        let results = await db.query(sql)
-            .then(x => x)
-            .catch(err => {
-                console.error('[Device] Error:', err);
-                return null;
-            });
-        let devices = [];
-        if (results) {
-            let keys = Object.values(results);
-            keys.forEach(key => {
-                let device = new Device(
-                    key.uuid,
-                    key.instance_name,
-                    key.account_username,
-                    key.last_host,
-                    key.last_seen,
-                    key.last_lat,
-                    key.last_lon
-                );
-                devices.push(device);
-            });
-        }
-        return devices;
-    }
-
-    /**
      * Get device based on uuid.
      * @param uuid 
      */
