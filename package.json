@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/versx/GoFestController#readme",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "eslint": "^7.4.0",
     "express": "^4.17.1",
     "google-protobuf": "^3.12.2",
